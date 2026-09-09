@@ -1,0 +1,162 @@
+# ==========================================
+# Stallion VTOL — tilt-tri with vectored yaw
+# Initial parameter set for Step 3 hover test
+# ==========================================
+
+
+# --- Enable quadplane
+Q_ENABLE          1
+Q_FRAME_CLASS     7        # 7 = Tri
+Q_FRAME_TYPE      1        # X-frame (irrelevant for tri, but must be non-zero)
+
+# --- Tilt-rotor config
+Q_TILT_ENABLE     1
+Q_TILT_MASK       3        # motors 1 + 2
+Q_TILT_TYPE       2        # vectored yaw (differential tilt for yaw in hover)
+Q_TILT_MAX        45       # max tilt angle in transition
+Q_TILT_RATE_UP    15       # deg/s tilt rate transitioning up (hover→cruise)
+Q_TILT_RATE_DN    15      # deg/s tilt rate transitioning down
+
+# --- Motor output mapping (SERVOn_FUNCTION)
+# Function codes: 33=Motor1, 34=Motor2, 36=Motor4, 75=TiltMotorLeft, 76=TiltMotorRight
+
+SERVO1_FUNCTION	  4
+SERVO2_FUNCTION   79
+SERVO4_FUNCTION	  80
+
+SERVO5_FUNCTION	  33
+SERVO6_FUNCTION   34
+SERVO7_FUNCTION   36
+
+SERVO9_FUNCTION   75       # tilt-left  (tilts motor 2 = front-left)
+SERVO10_FUNCTION  76       # tilt-right (tilts motor 1 = front-right)
+
+# --- Servo travel limits so 1000-2000 PWM maps cleanly
+SERVO1_MIN        1000
+SERVO1_MAX        2000
+SERVO2_MIN        1000
+SERVO2_MAX        2000
+SERVO4_MIN        1000
+SERVO4_MAX        2000
+
+SERVO5_MIN        1000
+SERVO5_MAX        2000
+SERVO6_MIN        1000
+SERVO6_MAX        2000
+SERVO7_MIN        1000
+SERVO7_MAX        2000
+SERVO9_MIN        1000
+SERVO9_MAX        2000
+SERVO10_MIN       1000
+SERVO10_MAX       2000
+
+SERVO1_TRIM       1500
+SERVO2_TRIM       1500
+SERVO4_TRIM	  1500
+
+SERVO9_TRIM       1500
+SERVO10_TRIM	  1500
+
+
+# --- Bypass pre-arm checks during bring-up
+ARMING_CHECK      0
+ARMING_REQUIRE    1
+
+# --- Motor spin/idle
+Q_M_PWM_MIN	  1000
+Q_M_PWM_MAX	  2000
+Q_M_SPIN_ARM      0.08
+Q_M_SPIN_MIN      0.10
+Q_M_SPIN_MAX      0.95
+Q_M_THST_EXPO     0.60
+Q_M_PWM_TYPE 	  7
+
+# PID CONTROLLER INITIAL SETUP
+
+INS_ACCEL_FILTER  12
+INS_GYRO_FILTER   60
+Q_A_ACC_P_MAX     1250
+Q_A_ACC_R_MAX     1250
+Q_A_ACC_Y_MAX     77
+
+Q_A_RAT_PIT_FLTD  30
+Q_A_RAT_PIT_FLTT  30
+Q_A_RAT_RLL_FLTD  30
+Q_A_RAT_RLL_FLTT  30
+Q_A_RAT_YAW_FLTE  0
+Q_A_RAT_YAW_FLTD  30
+
+
+# --- Wing / airspeed disabled for hover-only bring-up
+ARSPD_TYPE        0        # disable airspeed sensor (no pitot tube yet)
+Q_ASSIST_SPEED    -1       # disable transition assist for now
+
+Q_M_THST_HOVER    0.25
+
+# INITIAL AIRCRAFT TUNING 
+# Rate loop (torque commands)
+Q_A_RAT_RLL_P     0.2
+Q_A_RAT_RLL_I     0.2
+Q_A_RAT_RLL_D     0.01
+
+Q_A_RAT_PIT_P     0.2
+Q_A_RAT_PIT_I     0.2
+Q_A_RAT_PIT_D     0.01
+
+Q_TILT_YAW_ANGLE  20
+Q_A_RAT_YAW_FF    0.27
+Q_A_RAT_YAW_I	  0.27
+
+Q_M_HOVER_LEARN   2
+Q_P_D_ACC_I       0.05
+Q_P_D_ACC_P	  0.025
+ 
+AHRS_TRIM_Y	  0.014
+
+SCR_ENABLE     1      		# Enables Lua scripting
+SCR_HEAP_SIZE  200000 		# Allocates memory for script execution
+
+
+QWIK_ENABLE     1
+QWIK_AUTO_SAVE  1
+QWIK_AXES       1
+
+Q_LAND_FINAL_SPEED   0,3
+
+AUTOTUNE_LEVEL   8.0
+AIRSPEED_CRUISE  16.0
+AIRSPEED_MIN     12.0
+AIRSPEED_MAX     20.0
+TRIM_THROTTLE    60.0
+ROLL_LIMIT_DEG   45.0
+PTCH_LIM_MAX_DEG 40.0
+PTCH_LIM_MIN_DEG -35.0
+ARMING_RUDDER    0.0
+RLL2SRV_TCONST   0.200000
+RLL2SRV_RMAX     120.000000
+RLL_RATE_P       0.078235
+RLL_RATE_I       0.078235
+RLL_RATE_D       0.002715
+RLL_RATE_FF      0.122488
+RLL_RATE_FLTT    7.957747
+RLL_RATE_FLTD    10.000000
+PTCH2SRV_TCONST  0.300000
+PTCH2SRV_RMAX_UP 120.000000
+PTCH2SRV_RMAX_DN 120.000000
+PTCH_RATE_P      0.107653
+PTCH_RATE_I      0.689593
+PTCH_RATE_D      0.002469
+PTCH_RATE_FF     0.689593
+PTCH_RATE_FLTT   5.305164
+PTCH_RATE_FLTD   10.000000
+TECS_CLMB_MAX    30.000000
+TECS_SINK_MIN    1.250000
+TECS_LAND_ARSPD  14.000000
+TECS_LAND_THR    50.000000
+TECS_PITCH_MAX   40.000000
+TECS_LAND_DAMP   1.000000
+
+LAND_PITCH_DEG   100.000000
+LAND_FLARE_ALT   2.000000
+LAND_FLARE_SEC   1.000000
+LAND_FLARE_AIM   60.000000
