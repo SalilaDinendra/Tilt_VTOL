@@ -12,6 +12,7 @@
 #include "config.h"
 #include "pullup.h"
 #include "systemid.h"
+#include "pole_controller0.h"
 
 #ifndef AP_QUICKTUNE_ENABLED
 #define AP_QUICKTUNE_ENABLED HAL_QUADPLANE_ENABLED
@@ -1093,5 +1094,19 @@ public:
     // true if mode allows landing direction to be set on first takeoff after arm in this mode 
     bool allows_autoland_direction_capture() const override { return true; }
 #endif
+
+private:
+
+    // MATLAB/Simulink generated pole-placement controller
+    pole_controller0 pole_controller_model;
+
+    // Reference state vector
+    float p_ref = 0.0f;
+    float q_ref = 0.0f;
+    float r_ref = 0.0f;
+
+    float phi_ref   = 0.0f;
+    float theta_ref = 0.0f;
+    float psi_ref   = 0.0f;
 
 };
