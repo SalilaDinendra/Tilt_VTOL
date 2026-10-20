@@ -38,9 +38,18 @@ private:
     q_controller_fcn _q_hinf_controller;
     theta_controller_fcn _theta_hinf_controller;
 
-    bool _use_custom_angle_controller = false;
-    bool _use_custom_rate_controller  = true;
-    
+    bool _custom_reset_filter = true;
+    float _custom_target = 0.0f;
+    float _custom_error = 0.0f;
+    float _custom_derivative = 0.0f;
+    float _custom_target_derivative = 0.0f;
+    float _custom_integrator = 0.0f;
+
+#if AP_FILTER_ENABLED
+    NotchFilterFloat* _target_notch;
+    NotchFilterFloat* _error_notch;
+#endif
+
 
     // Return true if the airspeed should be considered as under speed
     bool is_underspeed() const override;

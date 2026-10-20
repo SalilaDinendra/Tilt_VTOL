@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'theta_controller_fcn'.
 //
-// Model version                  : 1.60
+// Model version                  : 1.61
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Mon Oct  5 16:45:46 2026
+// C/C++ source code generated on : Sun Oct 11 17:52:24 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Windows64)
@@ -54,10 +54,10 @@ void theta_controller_fcn::step()
   // Saturate: '<S46>/Saturation' incorporates:
   //   DiscreteIntegrator: '<S39>/Integrator'
 
-  if (theta_controller_fcn_DW.Integrator_DSTATE > 15.0F) {
-    rtb_IntegralGain = 15.0F;
-  } else if (theta_controller_fcn_DW.Integrator_DSTATE < -15.0F) {
-    rtb_IntegralGain = -15.0F;
+  if (theta_controller_fcn_DW.Integrator_DSTATE > 1.0E+6F) {
+    rtb_IntegralGain = 1.0E+6F;
+  } else if (theta_controller_fcn_DW.Integrator_DSTATE < -1.0E+6F) {
+    rtb_IntegralGain = -1.0E+6F;
   } else {
     rtb_IntegralGain = theta_controller_fcn_DW.Integrator_DSTATE;
   }
@@ -71,12 +71,12 @@ void theta_controller_fcn::step()
   // DeadZone: '<S31>/DeadZone' incorporates:
   //   DiscreteIntegrator: '<S39>/Integrator'
 
-  if (theta_controller_fcn_DW.Integrator_DSTATE > 15.0F) {
-    rtb_IntegralGain = theta_controller_fcn_DW.Integrator_DSTATE - 15.0F;
-  } else if (theta_controller_fcn_DW.Integrator_DSTATE >= -15.0F) {
+  if (theta_controller_fcn_DW.Integrator_DSTATE > 1.0E+6F) {
+    rtb_IntegralGain = theta_controller_fcn_DW.Integrator_DSTATE - 1.0E+6F;
+  } else if (theta_controller_fcn_DW.Integrator_DSTATE >= -1.0E+6F) {
     rtb_IntegralGain = 0.0F;
   } else {
-    rtb_IntegralGain = theta_controller_fcn_DW.Integrator_DSTATE - -15.0F;
+    rtb_IntegralGain = theta_controller_fcn_DW.Integrator_DSTATE - -1.0E+6F;
   }
 
   // End of DeadZone: '<S31>/DeadZone'
@@ -84,7 +84,7 @@ void theta_controller_fcn::step()
   // RelationalOperator: '<S29>/Relational Operator' incorporates:
   //   Constant: '<S29>/Clamping_zero'
 
-  rtb_RelationalOperator = (!(iszero(rtb_IntegralGain)));
+  rtb_RelationalOperator = (!iszero(rtb_IntegralGain));
 
   // Switch: '<S29>/Switch1' incorporates:
   //   Constant: '<S29>/Clamping_zero'
@@ -103,7 +103,7 @@ void theta_controller_fcn::step()
   // Gain: '<S36>/Integral Gain' incorporates:
   //   Inport: '<Root>/theta_error'
 
-  rtb_IntegralGain = 0.05F * theta_controller_fcn_U.theta_error;
+  rtb_IntegralGain = 0.08F * theta_controller_fcn_U.theta_error;
 
   // Update for DiscreteStateSpace: '<S1>/Discrete State-Space' incorporates:
   //   Inport: '<Root>/theta_error'
@@ -131,7 +131,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[0] += (0.0380650312F)*theta_controller_fcn_U.theta_error;
+    xnew[0] += (0.159004152F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow1[6]{ 0, 1, 2, 3, 4, 5 };
@@ -154,7 +154,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[1] += (6.08705517E-11F)*theta_controller_fcn_U.theta_error;
+    xnew[1] += (2.72050671E-9F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow2[6]{ 0, 1, 2, 3, 4, 5 };
@@ -177,7 +177,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[2] += (-2.66200448E-8F)*theta_controller_fcn_U.theta_error;
+    xnew[2] += (-2.25837589E-8F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow3[6]{ 0, 1, 2, 3, 4, 5 };
@@ -200,7 +200,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[3] += (-6.23270058E-9F)*theta_controller_fcn_U.theta_error;
+    xnew[3] += (-6.08149586E-10F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow4[6]{ 0, 1, 2, 3, 4, 5 };
@@ -223,7 +223,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[4] += (-1.3144158E-10F)*theta_controller_fcn_U.theta_error;
+    xnew[4] += (-1.52925285E-12F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow5[6]{ 0, 1, 2, 3, 4, 5 };
@@ -246,7 +246,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[5] += (-1.08823497E-12F)*theta_controller_fcn_U.theta_error;
+    xnew[5] += (-1.54305083E-15F)*theta_controller_fcn_U.theta_error;
     (void) std::memcpy(&theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0],
                        xnew,
                        sizeof(real32_T)*6);

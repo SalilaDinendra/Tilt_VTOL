@@ -159,9 +159,9 @@ float AP_PitchController::run_custom_angle_control(
     bool disable_integrator,
     bool ground_mode)
 {
-
-    /// NATIVE PART ///
 /*
+    /// NATIVE PART ///
+
     // Ensure tau is valid
     if (gains.tau < 0.05f) {
         gains.tau.set(0.05f);
@@ -227,8 +227,8 @@ float AP_PitchController::run_custom_angle_control(
     float desired_rate_degs = sqrt_controller(angle_err_deg, angle_gain, accel_max * 0.5, dt);
 
     // Add feed forward rate demand and offset then constrain to rate limit
-    desired_rate_degs = rate_limit_degs(desired_rate_degs + rate_target_degs + get_rate_target_offset_degs()); */
-
+    desired_rate_degs = rate_limit_degs(desired_rate_degs + rate_target_degs + get_rate_target_offset_degs()); 
+*/
     /// CUSTOM PART ///
     
     // Convert desired pitch cd to degrees
@@ -334,34 +334,91 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
     const float dt = AP::scheduler().get_loop_period_s();
 
     //const float eas2tas = AP::ahrs().get_EAS2TAS();
-    bool limit_I = fabsf(_last_out) >= 45;
+    //bool limit_I = fabsf(_last_out) >= 45;
     const float rate_rads = get_measured_rate_rads();
     //const float old_I = rate_pid.get_i();
 
-    const bool underspeed = is_underspeed();
-    if (underspeed) {
-        limit_I = true;
+    //const bool underspeed = is_underspeed();
+    //if (underspeed) {
+        //limit_I = true;
+    //}
+
+    float target = radians(desired_rate_degs) * scaler * scaler;
+
+    const float measurement = rate_rads * scaler * scaler;
+
+    // Return zero if input is invalid (NaN or infinite)
+    if (!isfinite(target) || !isfinite(measurement)) {
+        return 0.0f;
     }
 
-    rate_pid.update_all(radians(desired_rate_degs) * scaler * scaler, rate_rads * scaler * scaler, dt, limit_I);
+    // Flag used for logging to indicate a filter reset occurred
+    _pid_info.reset = _custom_reset_filter;
 
-    const auto &native_pid_info = rate_pid.get_pid_info();
-    const float filtered_rate_error_rads = native_pid_info.error;
+    // Reset filters to match the current input (first sample or after reset)
+    if (_custom_reset_filter) {
+        // Reset filters to match the current inputs
+        _custom_reset_filter = false;
+
+        // Reset target filter
+        _custom_target = target;
+#if AP_FILTER_ENABLED
+        if (_target_notch != nullptr) {
+            _target_notch->reset();
+            _custom_target = _target_notch->apply(_custom_target);
+        }
+#endif
+
+        // Calculate error and reset error filter
+        _custom_error = _custom_target - measurement;
+#if AP_FILTER_ENABLED
+        if (_error_notch != nullptr) {
+            _error_notch->reset();
+            _custom_error = _error_notch->apply(_custom_error);
+        }
+#endif
+        // Clear derivative history to avoid spikes after reset
+        _custom_derivative = 0.0f;
+        _custom_target_derivative = 0.0f;
+
+    } else {
+
+        // Apply target filters
+        const float target_last = _custom_target;
+#if AP_FILTER_ENABLED
+        if (_target_notch != nullptr) {
+            // Allocate and set up target notch filter
+            target = _target_notch->apply(target);
+        }
+#endif
+        // Apply first-order low-pass filter to target value
+        _custom_target += rate_pid.get_filt_T_alpha(dt) * (target - _custom_target);
+
+        // Calculate error and apply error filter
+        const float error_last = _custom_error;
+
+        float error = _custom_target - measurement;
+#if AP_FILTER_ENABLED
+        if (_error_notch != nullptr) {
+            // Allocate and set up error notch filter
+            error = _error_notch->apply(error);
+        }
+#endif
+        // apply notch filters before FTLD/FLTE to minimize shot noise
+        _custom_error += rate_pid.get_filt_E_alpha(dt) * (error - _custom_error);
+
+        if (is_positive(dt)) {
+            // Compute and low-pass filter the error derivative (D term)
+            float derivative = (_custom_error - error_last) / dt;
+            _custom_derivative += rate_pid.get_filt_D_alpha(dt) * (derivative - _custom_derivative);
+            // Calculate target derivative for D_FF contribution
+            _custom_target_derivative = (_custom_target - target_last) / dt;
+        }
+    }
+
+    return 0.0f;
 
 
-    // From Simulink Controller
-    q_controller_fcn::ExtU_q_controller_fcn_T hinf_input{};
-    
-    hinf_input.q_error = filtered_rate_error_rads;
-
-    _q_hinf_controller.setExternalInputs(&hinf_input);
-
-    _q_hinf_controller.step();
-
-    const auto &hinf_output = _q_hinf_controller.getExternalOutputs();
-    const float hinf_pitch_command = hinf_output.pitch_command;
-
-    return hinf_pitch_command*100.0f;
 }
 
 
