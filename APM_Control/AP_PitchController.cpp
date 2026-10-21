@@ -159,7 +159,7 @@ float AP_PitchController::run_custom_angle_control(
     bool disable_integrator,
     bool ground_mode)
 {
-/*
+
     /// NATIVE PART ///
 
     // Ensure tau is valid
@@ -228,7 +228,7 @@ float AP_PitchController::run_custom_angle_control(
 
     // Add feed forward rate demand and offset then constrain to rate limit
     desired_rate_degs = rate_limit_degs(desired_rate_degs + rate_target_degs + get_rate_target_offset_degs()); 
-*/
+/*
     /// CUSTOM PART ///
     
     // Convert desired pitch cd to degrees
@@ -262,8 +262,8 @@ float AP_PitchController::run_custom_angle_control(
     if (should_apply_rate_limits()){
         desired_rate_degs = rate_limit_degs(desired_rate_degs);
     }
-
-    return run_axis_rate_control(
+*/
+    return run_custom_axis_rate_control(
         desired_rate_degs,
         scaler,
         disable_integrator,
@@ -333,15 +333,15 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
 
     const float dt = AP::scheduler().get_loop_period_s();
 
-    //const float eas2tas = AP::ahrs().get_EAS2TAS();
-    //bool limit_I = fabsf(_last_out) >= 45;
+    const float eas2tas = AP::ahrs().get_EAS2TAS();
+    bool limit_I = fabsf(_last_out) >= 45;
     const float rate_rads = get_measured_rate_rads();
     //const float old_I = rate_pid.get_i();
 
-    //const bool underspeed = is_underspeed();
-    //if (underspeed) {
-        //limit_I = true;
-    //}
+    const bool underspeed = is_underspeed();
+    if (underspeed) {
+        limit_I = true;
+    }
 
     float target = radians(desired_rate_degs) * scaler * scaler;
 
@@ -415,10 +415,124 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
             _custom_target_derivative = (_custom_target - target_last) / dt;
         }
     }
+    
+    update_i(dt, limit_I, 1.0f);
 
-    return 0.0f;
+    // Get native PID gains from ArduPilot parameters
+    const float Kp = rate_pid.kP().get();
+    const float Kd = rate_pid.kD().get();
+    
 
 
+    float P_out = (_custom_error * Kp);
+    float D_out = (_custom_derivative * Kd);
+    float I_out = _custom_integrator;
+
+    // This modifier is used to reduce control effort under fast transients
+    P_out *= _pid_info.Dmod;
+    D_out *= _pid_info.Dmod;
+
+    // scale pd output if required
+    P_out *= 1.0f;
+    D_out *= 1.0f;
+
+    const float Kpdmax = rate_pid.pdmax();
+
+
+    _pid_info.PD_limit = false;
+    // Apply PD sum limit if enabled
+    if (is_positive(Kpdmax)) {
+        const float PD_sum_abs = fabsf(P_out + D_out);
+        if (PD_sum_abs > Kpdmax) {
+            const float pd_limit_scale = Kpdmax / PD_sum_abs;
+            P_out *= pd_limit_scale;
+            D_out *= pd_limit_scale;
+            _pid_info.PD_limit = true;
+        }
+    }
+
+    const float Kff = rate_pid.ff().get();
+    const float Kdff = rate_pid.kDff().get();
+
+    _pid_info.target = _custom_target;
+    _pid_info.actual = measurement;
+    _pid_info.error = _custom_error;
+
+    _pid_info.P = P_out;
+    _pid_info.D = D_out;
+    _pid_info.I = I_out;
+
+    _pid_info.limit = limit_I;
+
+    // Set I set flag for logging and clear
+    _pid_info.I_term_set = _custom_I_set;
+    _custom_I_set = false;
+
+    _pid_info.FF = _custom_target * Kff;
+    _pid_info.DFF = _custom_target_derivative * Kdff;
+
+
+    // ###################### Update_all ends ########################
+
+    const float ff = degrees(ff_scale *  _pid_info.FF / (scaler * eas2tas));
+    const float dff = degrees(ff_scale * _pid_info.DFF / (scaler * eas2tas));
+
+    ff_scale = 1.0;
+
+    if (disable_integrator) {
+    _custom_integrator = 0.0f;
+    _custom_I_set = true;
+    }
+
+    
+    auto &pinfo = _pid_info;
+
+    const float deg_scale = degrees(1.0f);
+    pinfo.FF = ff;
+    pinfo.P *= deg_scale;
+    pinfo.I *= deg_scale;
+    pinfo.D *= deg_scale;
+    pinfo.DFF = dff;
+
+    // fix the logged target and actual values to not have the scalers applied
+    pinfo.target = desired_rate_degs;
+    pinfo.actual = degrees(rate_rads);
+
+    // sum components
+    float out = pinfo.FF + pinfo.P + pinfo.I + pinfo.D + pinfo.DFF;
+    
+    if (ground_mode) {
+        // when on ground suppress D and half P term to prevent oscillations
+        out -= pinfo.D + 0.5*pinfo.P;
+    }
+
+    // remember the last output to trigger the I limit
+    _last_out = out;
+
+    if (autotune != nullptr && autotune->running && get_airspeed() > aparm.airspeed_min) {
+        // let autotune have a go at the values
+        autotune->update(pinfo, scaler, angle_err_deg);
+    }
+
+    // output is scaled to notional centidegrees of deflection
+    return constrain_float(out * 100, -4500, 4500);
+}
+
+
+void AP_PitchController::update_i(float dt, bool limit, float i_scale)
+{   
+    const float Ki = rate_pid.kI().get();
+    const float Imax = rate_pid.imax();
+
+    if (!is_zero(Ki) && is_positive(dt)) {
+        // Allow integrator growth only if not limited, or if error opposes the integrator direction
+        if (!limit || ((is_positive(_custom_integrator) && is_negative(_custom_error)) || (is_negative(_custom_integrator) && is_positive(_custom_error)))) {
+            _custom_integrator += ((float)_custom_error * Ki) * i_scale * dt;
+            _custom_integrator = constrain_float(_custom_integrator, -Imax, Imax);
+        }
+    } else {
+        _custom_integrator = 0.0f;
+    }
 }
 
 

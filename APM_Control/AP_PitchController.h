@@ -38,7 +38,10 @@ private:
     q_controller_fcn _q_hinf_controller;
     theta_controller_fcn _theta_hinf_controller;
 
+    void update_i(float dt, bool limit, float i_scale = 1.0f);
+
     bool _custom_reset_filter = true;
+    bool _custom_I_set = false;
     float _custom_target = 0.0f;
     float _custom_error = 0.0f;
     float _custom_derivative = 0.0f;
