@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'theta_controller_fcn'.
 //
-// Model version                  : 1.61
+// Model version                  : 1.62
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Sun Oct 11 17:52:24 2026
+// C/C++ source code generated on : Thu Oct 22 09:11:42 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Windows64)
@@ -26,7 +26,7 @@ class theta_controller_fcn final
  public:
   // Block states (default storage) for system '<Root>'
   struct DW_theta_controller_fcn_T {
-    real32_T DiscreteStateSpace_DSTATE[6];// '<S1>/Discrete State-Space'
+    real32_T DiscreteStateSpace_DSTATE[12];// '<S1>/Discrete State-Space'
     real32_T Integrator_DSTATE;        // '<S39>/Integrator'
   };
 
@@ -35,12 +35,12 @@ class theta_controller_fcn final
     // Computed Parameter: DiscreteStateSpace_A
     //  Referenced by: '<S1>/Discrete State-Space'
 
-    real32_T DiscreteStateSpace_A[36];
+    real32_T DiscreteStateSpace_A[133];
 
     // Computed Parameter: DiscreteStateSpace_C
     //  Referenced by: '<S1>/Discrete State-Space'
 
-    real32_T DiscreteStateSpace_C[6];
+    real32_T DiscreteStateSpace_C[12];
   };
 
   // External inputs (root inport signals with default storage)

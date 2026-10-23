@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'theta_controller_fcn'.
 //
-// Model version                  : 1.61
+// Model version                  : 1.62
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Sun Oct 11 17:52:24 2026
+// C/C++ source code generated on : Thu Oct 22 09:11:42 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Windows64)
@@ -31,7 +31,7 @@ void theta_controller_fcn::step()
 
   {
     {
-      static const int_T colCidxRow0[6]{ 0, 1, 2, 3, 4, 5 };
+      static const int_T colCidxRow0[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
       const int_T *pCidx{ &colCidxRow0[0] };
 
@@ -42,7 +42,7 @@ void theta_controller_fcn::step()
 
       real32_T *y0{ &rtb_DiscreteStateSpace };
 
-      int_T numNonZero{ 5 };
+      int_T numNonZero{ 11 };
 
       *y0 = (*pC0++) * xd[*pCidx++];
       while (numNonZero--) {
@@ -103,42 +103,22 @@ void theta_controller_fcn::step()
   // Gain: '<S36>/Integral Gain' incorporates:
   //   Inport: '<Root>/theta_error'
 
-  rtb_IntegralGain = 0.08F * theta_controller_fcn_U.theta_error;
+  rtb_IntegralGain = 0.1F * theta_controller_fcn_U.theta_error;
 
   // Update for DiscreteStateSpace: '<S1>/Discrete State-Space' incorporates:
   //   Inport: '<Root>/theta_error'
 
   {
-    real32_T xnew[6];
+    real32_T xnew[12];
+    xnew[0] = (0.990049839F)*theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0];
+    xnew[0] += (0.159202665F)*theta_controller_fcn_U.theta_error;
 
     {
-      static const int_T colAidxRow0[6]{ 0, 1, 2, 3, 4, 5 };
-
-      const int_T *pAidx{ &colAidxRow0[0] };
-
-      const real32_T *pA0{ theta_controller_fcn_ConstP.DiscreteStateSpace_A };
-
-      const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
-      };
-
-      real32_T *pxnew0{ &xnew[0] };
-
-      int_T numNonZero{ 5 };
-
-      *pxnew0 = (*pA0++) * xd[*pAidx++];
-      while (numNonZero--) {
-        *pxnew0 += (*pA0++) * xd[*pAidx++];
-      }
-    }
-
-    xnew[0] += (0.159004152F)*theta_controller_fcn_U.theta_error;
-
-    {
-      static const int_T colAidxRow1[6]{ 0, 1, 2, 3, 4, 5 };
+      static const int_T colAidxRow1[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
       const int_T *pAidx{ &colAidxRow1[0] };
 
-      const real32_T *pA6{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[6]
+      const real32_T *pA1{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[1]
       };
 
       const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
@@ -146,22 +126,22 @@ void theta_controller_fcn::step()
 
       real32_T *pxnew1{ &xnew[1] };
 
-      int_T numNonZero{ 5 };
+      int_T numNonZero{ 11 };
 
-      *pxnew1 = (*pA6++) * xd[*pAidx++];
+      *pxnew1 = (*pA1++) * xd[*pAidx++];
       while (numNonZero--) {
-        *pxnew1 += (*pA6++) * xd[*pAidx++];
+        *pxnew1 += (*pA1++) * xd[*pAidx++];
       }
     }
 
-    xnew[1] += (2.72050671E-9F)*theta_controller_fcn_U.theta_error;
+    xnew[1] += (8.94141613E-6F)*theta_controller_fcn_U.theta_error;
 
     {
-      static const int_T colAidxRow2[6]{ 0, 1, 2, 3, 4, 5 };
+      static const int_T colAidxRow2[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
       const int_T *pAidx{ &colAidxRow2[0] };
 
-      const real32_T *pA12{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[12]
+      const real32_T *pA13{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[13]
       };
 
       const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
@@ -169,22 +149,22 @@ void theta_controller_fcn::step()
 
       real32_T *pxnew2{ &xnew[2] };
 
-      int_T numNonZero{ 5 };
+      int_T numNonZero{ 11 };
 
-      *pxnew2 = (*pA12++) * xd[*pAidx++];
+      *pxnew2 = (*pA13++) * xd[*pAidx++];
       while (numNonZero--) {
-        *pxnew2 += (*pA12++) * xd[*pAidx++];
+        *pxnew2 += (*pA13++) * xd[*pAidx++];
       }
     }
 
-    xnew[2] += (-2.25837589E-8F)*theta_controller_fcn_U.theta_error;
+    xnew[2] += (-680.025513F)*theta_controller_fcn_U.theta_error;
 
     {
-      static const int_T colAidxRow3[6]{ 0, 1, 2, 3, 4, 5 };
+      static const int_T colAidxRow3[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
       const int_T *pAidx{ &colAidxRow3[0] };
 
-      const real32_T *pA18{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[18]
+      const real32_T *pA25{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[25]
       };
 
       const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
@@ -192,22 +172,22 @@ void theta_controller_fcn::step()
 
       real32_T *pxnew3{ &xnew[3] };
 
-      int_T numNonZero{ 5 };
+      int_T numNonZero{ 11 };
 
-      *pxnew3 = (*pA18++) * xd[*pAidx++];
+      *pxnew3 = (*pA25++) * xd[*pAidx++];
       while (numNonZero--) {
-        *pxnew3 += (*pA18++) * xd[*pAidx++];
+        *pxnew3 += (*pA25++) * xd[*pAidx++];
       }
     }
 
-    xnew[3] += (-6.08149586E-10F)*theta_controller_fcn_U.theta_error;
+    xnew[3] += (-1.73441819E-7F)*theta_controller_fcn_U.theta_error;
 
     {
-      static const int_T colAidxRow4[6]{ 0, 1, 2, 3, 4, 5 };
+      static const int_T colAidxRow4[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
       const int_T *pAidx{ &colAidxRow4[0] };
 
-      const real32_T *pA24{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[24]
+      const real32_T *pA37{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[37]
       };
 
       const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
@@ -215,22 +195,22 @@ void theta_controller_fcn::step()
 
       real32_T *pxnew4{ &xnew[4] };
 
-      int_T numNonZero{ 5 };
+      int_T numNonZero{ 11 };
 
-      *pxnew4 = (*pA24++) * xd[*pAidx++];
+      *pxnew4 = (*pA37++) * xd[*pAidx++];
       while (numNonZero--) {
-        *pxnew4 += (*pA24++) * xd[*pAidx++];
+        *pxnew4 += (*pA37++) * xd[*pAidx++];
       }
     }
 
-    xnew[4] += (-1.52925285E-12F)*theta_controller_fcn_U.theta_error;
+    xnew[4] += (3.50151786E-5F)*theta_controller_fcn_U.theta_error;
 
     {
-      static const int_T colAidxRow5[6]{ 0, 1, 2, 3, 4, 5 };
+      static const int_T colAidxRow5[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
       const int_T *pAidx{ &colAidxRow5[0] };
 
-      const real32_T *pA30{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[30]
+      const real32_T *pA49{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[49]
       };
 
       const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
@@ -238,18 +218,158 @@ void theta_controller_fcn::step()
 
       real32_T *pxnew5{ &xnew[5] };
 
-      int_T numNonZero{ 5 };
+      int_T numNonZero{ 11 };
 
-      *pxnew5 = (*pA30++) * xd[*pAidx++];
+      *pxnew5 = (*pA49++) * xd[*pAidx++];
       while (numNonZero--) {
-        *pxnew5 += (*pA30++) * xd[*pAidx++];
+        *pxnew5 += (*pA49++) * xd[*pAidx++];
       }
     }
 
-    xnew[5] += (-1.54305083E-15F)*theta_controller_fcn_U.theta_error;
+    xnew[5] += (5.86596911E-7F)*theta_controller_fcn_U.theta_error;
+
+    {
+      static const int_T colAidxRow6[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+
+      const int_T *pAidx{ &colAidxRow6[0] };
+
+      const real32_T *pA61{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[61]
+      };
+
+      const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
+      };
+
+      real32_T *pxnew6{ &xnew[6] };
+
+      int_T numNonZero{ 11 };
+
+      *pxnew6 = (*pA61++) * xd[*pAidx++];
+      while (numNonZero--) {
+        *pxnew6 += (*pA61++) * xd[*pAidx++];
+      }
+    }
+
+    xnew[6] += (1.00987019E-9F)*theta_controller_fcn_U.theta_error;
+
+    {
+      static const int_T colAidxRow7[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+
+      const int_T *pAidx{ &colAidxRow7[0] };
+
+      const real32_T *pA73{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[73]
+      };
+
+      const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
+      };
+
+      real32_T *pxnew7{ &xnew[7] };
+
+      int_T numNonZero{ 11 };
+
+      *pxnew7 = (*pA73++) * xd[*pAidx++];
+      while (numNonZero--) {
+        *pxnew7 += (*pA73++) * xd[*pAidx++];
+      }
+    }
+
+    xnew[7] += (7.3855749E-13F)*theta_controller_fcn_U.theta_error;
+
+    {
+      static const int_T colAidxRow8[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+
+      const int_T *pAidx{ &colAidxRow8[0] };
+
+      const real32_T *pA85{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[85]
+      };
+
+      const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
+      };
+
+      real32_T *pxnew8{ &xnew[8] };
+
+      int_T numNonZero{ 11 };
+
+      *pxnew8 = (*pA85++) * xd[*pAidx++];
+      while (numNonZero--) {
+        *pxnew8 += (*pA85++) * xd[*pAidx++];
+      }
+    }
+
+    xnew[8] += (9588.61523F)*theta_controller_fcn_U.theta_error;
+
+    {
+      static const int_T colAidxRow9[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+
+      const int_T *pAidx{ &colAidxRow9[0] };
+
+      const real32_T *pA97{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A[97]
+      };
+
+      const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
+      };
+
+      real32_T *pxnew9{ &xnew[9] };
+
+      int_T numNonZero{ 11 };
+
+      *pxnew9 = (*pA97++) * xd[*pAidx++];
+      while (numNonZero--) {
+        *pxnew9 += (*pA97++) * xd[*pAidx++];
+      }
+    }
+
+    xnew[9] += (286.499817F)*theta_controller_fcn_U.theta_error;
+
+    {
+      static const int_T colAidxRow10[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+      };
+
+      const int_T *pAidx{ &colAidxRow10[0] };
+
+      const real32_T *pA109{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A
+        [109] };
+
+      const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
+      };
+
+      real32_T *pxnew10{ &xnew[10] };
+
+      int_T numNonZero{ 11 };
+
+      *pxnew10 = (*pA109++) * xd[*pAidx++];
+      while (numNonZero--) {
+        *pxnew10 += (*pA109++) * xd[*pAidx++];
+      }
+    }
+
+    xnew[10] += (0.764765561F)*theta_controller_fcn_U.theta_error;
+
+    {
+      static const int_T colAidxRow11[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+      };
+
+      const int_T *pAidx{ &colAidxRow11[0] };
+
+      const real32_T *pA121{ &theta_controller_fcn_ConstP.DiscreteStateSpace_A
+        [121] };
+
+      const real32_T *xd{ &theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0]
+      };
+
+      real32_T *pxnew11{ &xnew[11] };
+
+      int_T numNonZero{ 11 };
+
+      *pxnew11 = (*pA121++) * xd[*pAidx++];
+      while (numNonZero--) {
+        *pxnew11 += (*pA121++) * xd[*pAidx++];
+      }
+    }
+
+    xnew[11] += (0.000798225286F)*theta_controller_fcn_U.theta_error;
     (void) std::memcpy(&theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0],
                        xnew,
-                       sizeof(real32_T)*6);
+                       sizeof(real32_T)*12);
   }
 
   // Switch: '<S29>/Switch2' incorporates:

@@ -3,9 +3,9 @@
 //
 // Code generated for Simulink model 'q_controller_fcn'.
 //
-// Model version                  : 1.62
+// Model version                  : 1.64
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Sun Oct 11 17:39:48 2026
+// C/C++ source code generated on : Wed Oct 21 23:53:08 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Windows64)
@@ -17,6 +17,7 @@
 #include <cmath>
 #include "rtwtypes.h"
 #include "q_controller_fcn_types.h"
+#include <cstring>
 
 // Class declaration for model q_controller_fcn
 class q_controller_fcn final
@@ -25,8 +26,21 @@ class q_controller_fcn final
  public:
   // Block states (default storage) for system '<Root>'
   struct DW_q_controller_fcn_T {
+    real32_T DiscreteStateSpace_DSTATE[6];// '<S1>/Discrete State-Space'
     real32_T Integrator_DSTATE;        // '<S39>/Integrator'
-    real32_T Filter_DSTATE;            // '<S34>/Filter'
+  };
+
+  // Constant parameters (default storage)
+  struct ConstP_q_controller_fcn_T {
+    // Computed Parameter: DiscreteStateSpace_A
+    //  Referenced by: '<S1>/Discrete State-Space'
+
+    real32_T DiscreteStateSpace_A[36];
+
+    // Computed Parameter: DiscreteStateSpace_C
+    //  Referenced by: '<S1>/Discrete State-Space'
+
+    real32_T DiscreteStateSpace_C[6];
   };
 
   // External inputs (root inport signals with default storage)
@@ -103,6 +117,9 @@ class q_controller_fcn final
   RT_MODEL_q_controller_fcn_T q_controller_fcn_M;
 };
 
+// Constant parameters (default storage)
+extern const q_controller_fcn::ConstP_q_controller_fcn_T q_controller_fcn_ConstP;
+
 //-
 //  The generated code includes comments that allow you to trace directly
 //  back to the appropriate location in the model.  The basic format
@@ -151,23 +168,23 @@ class q_controller_fcn final
 //  '<S29>'  : 'q_controller/q_controller_fcn/PID Controller/Anti-windup/Disc. Clamping Parallel'
 //  '<S30>'  : 'q_controller/q_controller_fcn/PID Controller/Anti-windup/Disc. Clamping Parallel/Dead Zone'
 //  '<S31>'  : 'q_controller/q_controller_fcn/PID Controller/Anti-windup/Disc. Clamping Parallel/Dead Zone/Enabled'
-//  '<S32>'  : 'q_controller/q_controller_fcn/PID Controller/D Gain/Internal Parameters'
-//  '<S33>'  : 'q_controller/q_controller_fcn/PID Controller/External Derivative/Error'
-//  '<S34>'  : 'q_controller/q_controller_fcn/PID Controller/Filter/Disc. Forward Euler Filter'
-//  '<S35>'  : 'q_controller/q_controller_fcn/PID Controller/Filter ICs/Internal IC - Filter'
+//  '<S32>'  : 'q_controller/q_controller_fcn/PID Controller/D Gain/Disabled'
+//  '<S33>'  : 'q_controller/q_controller_fcn/PID Controller/External Derivative/Disabled'
+//  '<S34>'  : 'q_controller/q_controller_fcn/PID Controller/Filter/Disabled'
+//  '<S35>'  : 'q_controller/q_controller_fcn/PID Controller/Filter ICs/Disabled'
 //  '<S36>'  : 'q_controller/q_controller_fcn/PID Controller/I Gain/Internal Parameters'
 //  '<S37>'  : 'q_controller/q_controller_fcn/PID Controller/Ideal P Gain/Passthrough'
 //  '<S38>'  : 'q_controller/q_controller_fcn/PID Controller/Ideal P Gain Fdbk/Disabled'
 //  '<S39>'  : 'q_controller/q_controller_fcn/PID Controller/Integrator/Discrete'
 //  '<S40>'  : 'q_controller/q_controller_fcn/PID Controller/Integrator ICs/Internal IC'
-//  '<S41>'  : 'q_controller/q_controller_fcn/PID Controller/N Copy/Disabled'
-//  '<S42>'  : 'q_controller/q_controller_fcn/PID Controller/N Gain/Internal Parameters'
+//  '<S41>'  : 'q_controller/q_controller_fcn/PID Controller/N Copy/Disabled wSignal Specification'
+//  '<S42>'  : 'q_controller/q_controller_fcn/PID Controller/N Gain/Disabled'
 //  '<S43>'  : 'q_controller/q_controller_fcn/PID Controller/P Copy/Disabled'
-//  '<S44>'  : 'q_controller/q_controller_fcn/PID Controller/Parallel P Gain/Internal Parameters'
+//  '<S44>'  : 'q_controller/q_controller_fcn/PID Controller/Parallel P Gain/Disabled'
 //  '<S45>'  : 'q_controller/q_controller_fcn/PID Controller/Reset Signal/Disabled'
 //  '<S46>'  : 'q_controller/q_controller_fcn/PID Controller/Saturation/Enabled'
 //  '<S47>'  : 'q_controller/q_controller_fcn/PID Controller/Saturation Fdbk/Disabled'
-//  '<S48>'  : 'q_controller/q_controller_fcn/PID Controller/Sum/Sum_PID'
+//  '<S48>'  : 'q_controller/q_controller_fcn/PID Controller/Sum/Passthrough_I'
 //  '<S49>'  : 'q_controller/q_controller_fcn/PID Controller/Sum Fdbk/Disabled'
 //  '<S50>'  : 'q_controller/q_controller_fcn/PID Controller/Tracking Mode/Disabled'
 //  '<S51>'  : 'q_controller/q_controller_fcn/PID Controller/Tracking Mode Sum/Passthrough'

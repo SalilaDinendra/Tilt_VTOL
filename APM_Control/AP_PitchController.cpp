@@ -185,7 +185,7 @@ float AP_PitchController::run_custom_angle_control(
         }
 
         // Run rate controller
-        return run_axis_rate_control(desired_rate_degs, scaler, disable_integrator, ground_mode);
+        return run_custom_axis_rate_control(desired_rate_degs, scaler, disable_integrator, ground_mode);
     }
 
     // Apply input shaping to desired angle
@@ -228,19 +228,69 @@ float AP_PitchController::run_custom_angle_control(
 
     // Add feed forward rate demand and offset then constrain to rate limit
     desired_rate_degs = rate_limit_degs(desired_rate_degs + rate_target_degs + get_rate_target_offset_degs()); 
-/*
+
     /// CUSTOM PART ///
-    
-    // Convert desired pitch cd to degrees
-    const float desired_angle_deg = wrap_180(desired_angle_cd * 0.01f);
+    //######################################//
+/*
+    // Ensure tau is valid
+    if (gains.tau < 0.05f) {
+        gains.tau.set(0.05f);
+    }
+    const float desired_angle_deg = wrap_180(desired_angle_cd * 0.01);
 
-    // Measured pitch angle in degrees
-    const float measured_angle_deg = get_measured_angle_deg();
+    if (!should_apply_input_shaping()) {
+        // Calculate rate directly from angle error with no input shaping
+        angle_err_deg = wrap_180(desired_angle_deg - get_measured_angle_deg());
+        float desired_rate_degs = angle_err_deg / gains.tau;
 
-    // Pitch angle error in degrees
-    const float angle_error_deg = wrap_180(desired_angle_deg - measured_angle_deg);
+        // Reset input shaping set points
+        reset_input_shaping_deg(desired_angle_deg, desired_rate_degs);
 
-    const float angle_error_rad = angle_error_deg*DEG_TO_RAD;
+        // Add coordination offset
+        desired_rate_degs += get_rate_target_offset_degs();
+
+        // Apply rate limits if enabled
+        if (should_apply_rate_limits()) {
+            desired_rate_degs = rate_limit_degs(desired_rate_degs);
+        }
+
+        // Run rate controller
+        return run_custom_axis_rate_control(desired_rate_degs, scaler, disable_integrator, ground_mode);
+    }
+
+    // Apply input shaping to desired angle
+    const float dt = AP::scheduler().get_loop_period_s();
+
+    const float accel_max = accel_limit.get();
+    const float jerk_limit = accel_max / MAX(gains.tau.get(), 0.1);
+
+    // Ensure the shortest path is taken
+    const float angle_error = wrap_180(desired_angle_deg - angle_target_deg);
+
+    // Apply input shaping updating the accel target
+    shape_pos_vel_accel(
+        angle_error, 0.0, 0.0, // desired pos, vel and accel
+        0.0, rate_target_degs, accel_target_degss, // current shaped target
+        -get_negative_rate_limit_degs(), get_positive_rate_limit_degs(), // velocity limits
+        -accel_max, accel_max, // accel limits
+        jerk_limit, // jerk limit
+        dt, true
+    );
+
+    // Integrate pos and vel from updated accel target
+    angle_target_deg += rate_target_degs * dt + accel_target_degss * 0.5 * sq(dt);
+    rate_target_degs += accel_target_degss * dt;
+
+    // Make sure target remains in the range +-180
+    angle_target_deg = wrap_180(angle_target_deg);
+
+    // Calculate angle error
+    angle_err_deg = wrap_180(angle_target_deg - get_measured_angle_deg());
+
+    const float angle_error_rad = angle_err_deg*DEG_TO_RAD;
+
+    // Simulink generated code for H-infinity controller 
+    // #################################################
 
     theta_controller_fcn::ExtU_theta_controller_fcn_T hinf_input{};
 
@@ -253,15 +303,11 @@ float AP_PitchController::run_custom_angle_control(
     const auto &hinf_output = _theta_hinf_controller.getExternalOutputs();
 
     const float desired_rate_rads = hinf_output.q_command;
+
+
     float desired_rate_degs = degrees(desired_rate_rads);
 
-    // Ardupilot coordinated-turn pitch compensation
-    desired_rate_degs += get_rate_target_offset_degs();
-
-    // Ardupilot pitch rate limits
-    if (should_apply_rate_limits()){
-        desired_rate_degs = rate_limit_degs(desired_rate_degs);
-    }
+    desired_rate_degs = rate_limit_degs(desired_rate_degs + rate_target_degs + get_rate_target_offset_degs()); 
 */
     return run_custom_axis_rate_control(
         desired_rate_degs,
@@ -334,14 +380,14 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
     const float dt = AP::scheduler().get_loop_period_s();
 
     const float eas2tas = AP::ahrs().get_EAS2TAS();
-    bool limit_I = fabsf(_last_out) >= 45;
+    //bool limit_I = fabsf(_last_out) >= 45;
     const float rate_rads = get_measured_rate_rads();
     //const float old_I = rate_pid.get_i();
 
-    const bool underspeed = is_underspeed();
-    if (underspeed) {
-        limit_I = true;
-    }
+    // const bool underspeed = is_underspeed();
+    // if (underspeed) {
+    //     limit_I = true;
+    // }
 
     float target = radians(desired_rate_degs) * scaler * scaler;
 
@@ -415,12 +461,13 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
             _custom_target_derivative = (_custom_target - target_last) / dt;
         }
     }
-    
+/*
+    // ############## START OF PID CONTROL ####################
     update_i(dt, limit_I, 1.0f);
 
     // Get native PID gains from ArduPilot parameters
-    const float Kp = rate_pid.kP().get();
-    const float Kd = rate_pid.kD().get();
+    const float Kp = 0.3f;              //rate_pid.kP().get();
+    const float Kd = 0.0001f;                  //rate_pid.kD().get();
     
 
 
@@ -516,12 +563,33 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
 
     // output is scaled to notional centidegrees of deflection
     return constrain_float(out * 100, -4500, 4500);
+*/
+    // ############## END OF PID CONTROL ####################
+
+    const float ff = degrees(ff_scale *  _pid_info.FF / (scaler * eas2tas));
+    const float dff = degrees(ff_scale * _pid_info.DFF / (scaler * eas2tas));
+
+    // Filtered pitch-rate error [rad/s]
+    const float q_error_filtered = _custom_error;
+
+    q_controller_fcn::ExtU_q_controller_fcn_T hinf_input{};
+    hinf_input.q_error = q_error_filtered;
+    _q_hinf_controller.setExternalInputs(&hinf_input);
+
+    _q_hinf_controller.step();
+
+    const auto &hinf_output = _q_hinf_controller.getExternalOutputs();
+
+    const float pitch_command = hinf_output.pitch_cmd + ff + dff + 5.0f;
+
+    return constrain_float(pitch_command * 100.0f, -4500.0f, 4500.0f);
+
 }
 
 
 void AP_PitchController::update_i(float dt, bool limit, float i_scale)
 {   
-    const float Ki = rate_pid.kI().get();
+    const float Ki =   0.6f;              //rate_pid.kI().get();
     const float Imax = rate_pid.imax();
 
     if (!is_zero(Ki) && is_positive(dt)) {
