@@ -161,7 +161,7 @@ float AP_PitchController::run_custom_angle_control(
 {
 
     /// NATIVE PART ///
-
+/*
     // Ensure tau is valid
     if (gains.tau < 0.05f) {
         gains.tau.set(0.05f);
@@ -229,86 +229,86 @@ float AP_PitchController::run_custom_angle_control(
     // Add feed forward rate demand and offset then constrain to rate limit
     desired_rate_degs = rate_limit_degs(desired_rate_degs + rate_target_degs + get_rate_target_offset_degs()); 
 
-    /// CUSTOM PART ///
-    //######################################//
-/*
-    // Ensure tau is valid
+*/
+    // ###################### H Infinity controller #################################
+    // ##############################################################################
+
+// Ensure tau is valid (Retained for legacy ArduPilot checks, though unused by H-inf)
     if (gains.tau < 0.05f) {
         gains.tau.set(0.05f);
     }
-    const float desired_angle_deg = wrap_180(desired_angle_cd * 0.01);
-
-    if (!should_apply_input_shaping()) {
-        // Calculate rate directly from angle error with no input shaping
-        angle_err_deg = wrap_180(desired_angle_deg - get_measured_angle_deg());
-        float desired_rate_degs = angle_err_deg / gains.tau;
-
-        // Reset input shaping set points
-        reset_input_shaping_deg(desired_angle_deg, desired_rate_degs);
-
-        // Add coordination offset
-        desired_rate_degs += get_rate_target_offset_degs();
-
-        // Apply rate limits if enabled
-        if (should_apply_rate_limits()) {
-            desired_rate_degs = rate_limit_degs(desired_rate_degs);
-        }
-
-        // Run rate controller
-        return run_custom_axis_rate_control(desired_rate_degs, scaler, disable_integrator, ground_mode);
-    }
-
-    // Apply input shaping to desired angle
+    
+    // Fetch loop time for the integrator
     const float dt = AP::scheduler().get_loop_period_s();
 
-    const float accel_max = accel_limit.get();
-    const float jerk_limit = accel_max / MAX(gains.tau.get(), 0.1);
+    // Calculate the shortest path angle error
+    const float desired_angle_deg = wrap_180(desired_angle_cd * 0.01f);
+    angle_err_deg = wrap_180(desired_angle_deg - get_measured_angle_deg());
+    
+    // Convert to radians if your H-infinity model requires it
+    float e_k = angle_err_deg * DEG_TO_RAD; 
 
-    // Ensure the shortest path is taken
-    const float angle_error = wrap_180(desired_angle_deg - angle_target_deg);
+    // ############## START OF OUTER LOOP H-INFINITY + I CONTROL ####################
 
-    // Apply input shaping updating the accel target
-    shape_pos_vel_accel(
-        angle_error, 0.0, 0.0, // desired pos, vel and accel
-        0.0, rate_target_degs, accel_target_degss, // current shaped target
-        -get_negative_rate_limit_degs(), get_positive_rate_limit_degs(), // velocity limits
-        -accel_max, accel_max, // accel limits
-        jerk_limit, // jerk limit
-        dt, true
-    );
+    // 1. Calculate H-infinity Control Output: u[k] = Ck * x[k] + Dk * e[k]
+    float hinf_out = Outer_Dk * e_k;
+    for (uint8_t i = 0; i < OUTER_HINF_ORDER; i++) {
+        hinf_out += Outer_Ck[i] * _outer_hinf_x[i];
+    }
 
-    // Integrate pos and vel from updated accel target
-    angle_target_deg += rate_target_degs * dt + accel_target_degss * 0.5 * sq(dt);
-    rate_target_degs += accel_target_degss * dt;
+    // 2. Define Integral Parameters 
+    // (You can replace these with AP_Param variables later to tune via Mission Planner)
+    const float Ki_outer = 0.001f;   // Integral gain
+    const float I_max = 15.0f;     // Maximum authority of the integrator (anti-windup limit)
 
-    // Make sure target remains in the range +-180
-    angle_target_deg = wrap_180(angle_target_deg);
+    // 3. Update Controller States
+    if (ground_mode) {
+        // Zero internal states and the integrator on the ground to prevent windup
+        for (uint8_t i = 0; i < OUTER_HINF_ORDER; i++) {
+            _outer_hinf_x[i] = 0.0f;
+        }
+        _outer_integrator = 0.0f;
+    } else {
+        // Update H-infinity states
+        float x_next[OUTER_HINF_ORDER] = {0.0f};
+        
+        for (uint8_t i = 0; i < OUTER_HINF_ORDER; i++) {
+            x_next[i] = Outer_Bk[i] * e_k;
+            for (uint8_t j = 0; j < OUTER_HINF_ORDER; j++) {
+                x_next[i] += Outer_Ak[i][j] * _outer_hinf_x[j];
+            }
+        }
+        
+        for (uint8_t i = 0; i < OUTER_HINF_ORDER; i++) {
+            _outer_hinf_x[i] = x_next[i];
+        }
 
-    // Calculate angle error
-    angle_err_deg = wrap_180(angle_target_deg - get_measured_angle_deg());
+        // Update Parallel Integrator (Euler integration)
+        _outer_integrator += e_k * Ki_outer * dt;
+        
+        // Apply Anti-Windup Clamp
+        _outer_integrator = constrain_float(_outer_integrator, -I_max, I_max);
+    }
 
-    const float angle_error_rad = angle_err_deg*DEG_TO_RAD;
+    // 4. Sum Outputs 
+    // Ensure both hinf_out and _outer_integrator are in degrees/sec. 
+    // If hinf_out is in radians/sec, multiply it by RAD_TO_DEG before adding.
+    float desired_rate_degs = hinf_out + _outer_integrator;
 
-    // Simulink generated code for H-infinity controller 
-    // #################################################
+    // ############## END OF OUTER LOOP H-INFINITY + I CONTROL ####################
 
-    theta_controller_fcn::ExtU_theta_controller_fcn_T hinf_input{};
+    // Add coordination offset for fixed-wing coordinated turns
+    desired_rate_degs += get_rate_target_offset_degs();
 
-    hinf_input.theta_error = angle_error_rad;
+    // Apply ArduPilot's physical rate limits to protect the airframe
+    if (should_apply_rate_limits()) {
+        desired_rate_degs = rate_limit_degs(desired_rate_degs);
+    }
 
-    _theta_hinf_controller.setExternalInputs(&hinf_input);
+    // Run your inner loop H-infinity rate controller
+    return run_custom_axis_rate_control(desired_rate_degs, scaler, disable_integrator, ground_mode);
 
-    _theta_hinf_controller.step();
-
-    const auto &hinf_output = _theta_hinf_controller.getExternalOutputs();
-
-    const float desired_rate_rads = hinf_output.q_command;
-
-
-    float desired_rate_degs = degrees(desired_rate_rads);
-
-    desired_rate_degs = rate_limit_degs(desired_rate_degs + rate_target_degs + get_rate_target_offset_degs()); 
-*/
+    
     return run_custom_axis_rate_control(
         desired_rate_degs,
         scaler,
@@ -380,14 +380,14 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
     const float dt = AP::scheduler().get_loop_period_s();
 
     const float eas2tas = AP::ahrs().get_EAS2TAS();
-    //bool limit_I = fabsf(_last_out) >= 45;
+    bool limit_I = fabsf(_last_out) >= 45;
     const float rate_rads = get_measured_rate_rads();
     //const float old_I = rate_pid.get_i();
 
-    // const bool underspeed = is_underspeed();
-    // if (underspeed) {
-    //     limit_I = true;
-    // }
+    const bool underspeed = is_underspeed();
+    if (underspeed) {
+        limit_I = true;
+    }
 
     float target = radians(desired_rate_degs) * scaler * scaler;
 
@@ -564,32 +564,119 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
     // output is scaled to notional centidegrees of deflection
     return constrain_float(out * 100, -4500, 4500);
 */
+
     // ############## END OF PID CONTROL ####################
+
+    const float Kff = rate_pid.ff().get();
+    const float Kdff = rate_pid.kDff().get();
 
     const float ff = degrees(ff_scale *  _pid_info.FF / (scaler * eas2tas));
     const float dff = degrees(ff_scale * _pid_info.DFF / (scaler * eas2tas));
+    
+    update_i(dt, limit_I, 1.0f);
 
-    // Filtered pitch-rate error [rad/s]
-    const float q_error_filtered = _custom_error;
+    float I_out = _custom_integrator;
 
-    q_controller_fcn::ExtU_q_controller_fcn_T hinf_input{};
-    hinf_input.q_error = q_error_filtered;
-    _q_hinf_controller.setExternalInputs(&hinf_input);
+    _pid_info.I = I_out;
+    _pid_info.limit = limit_I;
 
-    _q_hinf_controller.step();
+    // Set I set flag for logging and clear
+    _pid_info.I_term_set = _custom_I_set;
+    _custom_I_set = false;
 
-    const auto &hinf_output = _q_hinf_controller.getExternalOutputs();
+    _pid_info.FF = _custom_target * Kff;
+    _pid_info.DFF = _custom_target_derivative * Kdff;
 
-    const float pitch_command = hinf_output.pitch_cmd + ff + dff + 5.0f;
+    if (disable_integrator) {
+    _custom_integrator = 0.0f;
+    _custom_I_set = true;
+    }
 
-    return constrain_float(pitch_command * 100.0f, -4500.0f, 4500.0f);
+    auto &pinfo = _pid_info;
+    const float deg_scale = degrees(1.0f);
+    pinfo.I *= deg_scale;
 
+    
+    // ############## START OF H-INFINITY CONTROL ####################
+    
+    // The input to our controller is the filtered error in radians/sec
+    float e_k = _custom_error;
+
+    // 1. Calculate Control Output: u[k] = Ck * x[k] + Dk * e[k]
+    float hinf_out = Dk * e_k;
+    for (uint8_t i = 0; i < HINF_ORDER; i++) {
+        hinf_out += Ck[i] * _hinf_x[i];
+    }
+
+    // Apply the scaling modifiers that ArduPilot uses for airspeed (dynamic pressure)
+    hinf_out *= scaler * scaler;
+
+    // 2. Update Controller States: x[k+1] = Ak * x[k] + Bk * e[k]
+    if (disable_integrator || !is_positive(dt)) {
+        // Zero all states
+        for (uint8_t i = 0; i < HINF_ORDER; i++) {
+            _hinf_x[i] = 0.0f;
+        }
+        _custom_I_set = true;
+    } else {
+        // Temporary array for x[k+1] so we don't overwrite x[k] during calculation
+        float x_next[HINF_ORDER] = {0.0f};
+        
+        for (uint8_t i = 0; i < HINF_ORDER; i++) {
+            x_next[i] = Bk[i] * e_k;
+            for (uint8_t j = 0; j < HINF_ORDER; j++) {
+                x_next[i] += Ak[i][j] * _hinf_x[j];
+            }
+        }
+        
+        // Push next state to current state
+        for (uint8_t i = 0; i < HINF_ORDER; i++) {
+            _hinf_x[i] = x_next[i];
+        }
+    }
+
+    // 3. Map to AP_Logger structures
+    // Since H-infinity doesn't separate P, I, and D, we log the total effort under P
+    // and zero out the rest to prevent logger garbage data.
+    _pid_info.target = _custom_target;
+    _pid_info.actual = measurement;
+    _pid_info.error = _custom_error;
+
+    _pid_info.P = hinf_out;
+
+    // ###################### Update_all ends ########################
+
+    
+    // Scale the output for ArduPilot's expected degree format
+    pinfo.P *= deg_scale;
+
+    // Fix the logged target and actual values to not have the scalers applied
+    pinfo.target = desired_rate_degs;
+    pinfo.actual = degrees(rate_rads);
+
+    // Sum components (Only P contains our H-inf output)
+    float out = pinfo.P + ff + dff + pinfo.I;
+
+    if (ground_mode) {
+        // When on ground, heavily suppress output to prevent oscillations
+        out *= 0.5f; 
+    }
+
+    // Remember the last output to trigger the limit flag next loop
+    _last_out = out;
+
+    // Note: Autotune is bypassed here because H-infinity relies on 
+    // offline nominal plant synthesis, not runtime Ziegler-Nichols probing.
+    
+    // Output is scaled to notional centidegrees of deflection
+    return constrain_float(out * 100, -4500, 4500);
+    
 }
 
 
 void AP_PitchController::update_i(float dt, bool limit, float i_scale)
 {   
-    const float Ki =   0.6f;              //rate_pid.kI().get();
+    const float Ki =   0.8f;              //rate_pid.kI().get();
     const float Imax = rate_pid.imax();
 
     if (!is_zero(Ki) && is_positive(dt)) {

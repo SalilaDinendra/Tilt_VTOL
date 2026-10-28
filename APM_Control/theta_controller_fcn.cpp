@@ -5,7 +5,7 @@
 //
 // Model version                  : 1.62
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Thu Oct 22 09:11:42 2026
+// C/C++ source code generated on : Tue Oct 27 12:31:07 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Windows64)
@@ -54,10 +54,10 @@ void theta_controller_fcn::step()
   // Saturate: '<S46>/Saturation' incorporates:
   //   DiscreteIntegrator: '<S39>/Integrator'
 
-  if (theta_controller_fcn_DW.Integrator_DSTATE > 1.0E+6F) {
-    rtb_IntegralGain = 1.0E+6F;
-  } else if (theta_controller_fcn_DW.Integrator_DSTATE < -1.0E+6F) {
-    rtb_IntegralGain = -1.0E+6F;
+  if (theta_controller_fcn_DW.Integrator_DSTATE > 15.0F) {
+    rtb_IntegralGain = 15.0F;
+  } else if (theta_controller_fcn_DW.Integrator_DSTATE < -15.0F) {
+    rtb_IntegralGain = -15.0F;
   } else {
     rtb_IntegralGain = theta_controller_fcn_DW.Integrator_DSTATE;
   }
@@ -71,12 +71,12 @@ void theta_controller_fcn::step()
   // DeadZone: '<S31>/DeadZone' incorporates:
   //   DiscreteIntegrator: '<S39>/Integrator'
 
-  if (theta_controller_fcn_DW.Integrator_DSTATE > 1.0E+6F) {
-    rtb_IntegralGain = theta_controller_fcn_DW.Integrator_DSTATE - 1.0E+6F;
-  } else if (theta_controller_fcn_DW.Integrator_DSTATE >= -1.0E+6F) {
+  if (theta_controller_fcn_DW.Integrator_DSTATE > 15.0F) {
+    rtb_IntegralGain = theta_controller_fcn_DW.Integrator_DSTATE - 15.0F;
+  } else if (theta_controller_fcn_DW.Integrator_DSTATE >= -15.0F) {
     rtb_IntegralGain = 0.0F;
   } else {
-    rtb_IntegralGain = theta_controller_fcn_DW.Integrator_DSTATE - -1.0E+6F;
+    rtb_IntegralGain = theta_controller_fcn_DW.Integrator_DSTATE - -15.0F;
   }
 
   // End of DeadZone: '<S31>/DeadZone'
@@ -110,8 +110,8 @@ void theta_controller_fcn::step()
 
   {
     real32_T xnew[12];
-    xnew[0] = (0.990049839F)*theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0];
-    xnew[0] += (0.159202665F)*theta_controller_fcn_U.theta_error;
+    xnew[0] = (0.923116326F)*theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0];
+    xnew[0] += (2.46027684F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow1[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
@@ -134,7 +134,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[1] += (8.94141613E-6F)*theta_controller_fcn_U.theta_error;
+    xnew[1] += (4.24811833E-6F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow2[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
@@ -157,7 +157,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[2] += (-680.025513F)*theta_controller_fcn_U.theta_error;
+    xnew[2] += (-0.45139426F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow3[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
@@ -180,7 +180,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[3] += (-1.73441819E-7F)*theta_controller_fcn_U.theta_error;
+    xnew[3] += (-2.64856396E-7F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow4[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
@@ -203,7 +203,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[4] += (3.50151786E-5F)*theta_controller_fcn_U.theta_error;
+    xnew[4] += (1.80636846E-6F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow5[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
@@ -226,7 +226,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[5] += (5.86596911E-7F)*theta_controller_fcn_U.theta_error;
+    xnew[5] += (2.46190382E-7F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow6[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
@@ -249,7 +249,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[6] += (1.00987019E-9F)*theta_controller_fcn_U.theta_error;
+    xnew[6] += (3.42831985E-9F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow7[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
@@ -272,7 +272,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[7] += (7.3855749E-13F)*theta_controller_fcn_U.theta_error;
+    xnew[7] += (2.02254619E-11F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow8[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
@@ -295,7 +295,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[8] += (9588.61523F)*theta_controller_fcn_U.theta_error;
+    xnew[8] += (0.39275822F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow9[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
@@ -318,7 +318,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[9] += (286.499817F)*theta_controller_fcn_U.theta_error;
+    xnew[9] += (0.0920398086F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow10[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
@@ -342,7 +342,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[10] += (0.764765561F)*theta_controller_fcn_U.theta_error;
+    xnew[10] += (0.00194196939F)*theta_controller_fcn_U.theta_error;
 
     {
       static const int_T colAidxRow11[12]{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
@@ -366,7 +366,7 @@ void theta_controller_fcn::step()
       }
     }
 
-    xnew[11] += (0.000798225286F)*theta_controller_fcn_U.theta_error;
+    xnew[11] += (1.60830514E-5F)*theta_controller_fcn_U.theta_error;
     (void) std::memcpy(&theta_controller_fcn_DW.DiscreteStateSpace_DSTATE[0],
                        xnew,
                        sizeof(real32_T)*12);

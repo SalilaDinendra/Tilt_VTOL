@@ -5,7 +5,7 @@
 //
 // Model version                  : 1.64
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Wed Oct 21 23:53:08 2026
+// C/C++ source code generated on : Tue Oct 27 12:30:41 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Windows64)
@@ -65,7 +65,7 @@ void q_controller_fcn::step()
   //   Saturate: '<S46>/Saturation'
   //   Sum: '<S1>/Sum'
 
-  q_controller_fcn_Y.pitch_cmd = rtb_IntegralGain + rtb_DiscreteStateSpace;
+  q_controller_fcn_Y.pitch_cmd = rtb_DiscreteStateSpace + rtb_IntegralGain;
 
   // DeadZone: '<S31>/DeadZone' incorporates:
   //   DiscreteIntegrator: '<S39>/Integrator'
@@ -102,7 +102,7 @@ void q_controller_fcn::step()
   // Gain: '<S36>/Integral Gain' incorporates:
   //   Inport: '<Root>/q_error'
 
-  rtb_IntegralGain = 0.8F * q_controller_fcn_U.q_error;
+  rtb_IntegralGain = 0.008F * q_controller_fcn_U.q_error;
 
   // Update for DiscreteStateSpace: '<S1>/Discrete State-Space' incorporates:
   //   Inport: '<Root>/q_error'
@@ -129,7 +129,7 @@ void q_controller_fcn::step()
       }
     }
 
-    xnew[0] += (0.31840533F)*q_controller_fcn_U.q_error;
+    xnew[0] += (2.46027684F)*q_controller_fcn_U.q_error;
 
     {
       static const int_T colAidxRow1[6]{ 0, 1, 2, 3, 4, 5 };
@@ -150,7 +150,7 @@ void q_controller_fcn::step()
       }
     }
 
-    xnew[1] += (7.24015337E-8F)*q_controller_fcn_U.q_error;
+    xnew[1] += (4.03473086E-6F)*q_controller_fcn_U.q_error;
 
     {
       static const int_T colAidxRow2[6]{ 0, 1, 2, 3, 4, 5 };
@@ -171,7 +171,7 @@ void q_controller_fcn::step()
       }
     }
 
-    xnew[2] += (-7.21523676E-8F)*q_controller_fcn_U.q_error;
+    xnew[2] += (-1.67834714E-5F)*q_controller_fcn_U.q_error;
 
     {
       static const int_T colAidxRow3[6]{ 0, 1, 2, 3, 4, 5 };
@@ -192,7 +192,7 @@ void q_controller_fcn::step()
       }
     }
 
-    xnew[3] += (-1.9425539E-9F)*q_controller_fcn_U.q_error;
+    xnew[3] += (-3.92206039E-6F)*q_controller_fcn_U.q_error;
 
     {
       static const int_T colAidxRow4[6]{ 0, 1, 2, 3, 4, 5 };
@@ -213,7 +213,7 @@ void q_controller_fcn::step()
       }
     }
 
-    xnew[4] += (-4.884143E-12F)*q_controller_fcn_U.q_error;
+    xnew[4] += (-8.26237567E-8F)*q_controller_fcn_U.q_error;
 
     {
       static const int_T colAidxRow5[6]{ 0, 1, 2, 3, 4, 5 };
@@ -234,7 +234,7 @@ void q_controller_fcn::step()
       }
     }
 
-    xnew[5] += (-4.89677582E-15F)*q_controller_fcn_U.q_error;
+    xnew[5] += (-6.83593127E-10F)*q_controller_fcn_U.q_error;
     (void) std::memcpy(&q_controller_fcn_DW.DiscreteStateSpace_DSTATE[0], xnew,
                        sizeof(real32_T)*6);
   }
