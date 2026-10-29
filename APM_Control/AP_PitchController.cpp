@@ -160,77 +160,7 @@ float AP_PitchController::run_custom_angle_control(
     bool ground_mode)
 {
 
-    /// NATIVE PART ///
-/*
-    // Ensure tau is valid
-    if (gains.tau < 0.05f) {
-        gains.tau.set(0.05f);
-    }
-    const float desired_angle_deg = wrap_180(desired_angle_cd * 0.01);
-
-    if (!should_apply_input_shaping()) {
-        // Calculate rate directly from angle error with no input shaping
-        angle_err_deg = wrap_180(desired_angle_deg - get_measured_angle_deg());
-        float desired_rate_degs = angle_err_deg / gains.tau;
-
-        // Reset input shaping set points
-        reset_input_shaping_deg(desired_angle_deg, desired_rate_degs);
-
-        // Add coordination offset
-        desired_rate_degs += get_rate_target_offset_degs();
-
-        // Apply rate limits if enabled
-        if (should_apply_rate_limits()) {
-            desired_rate_degs = rate_limit_degs(desired_rate_degs);
-        }
-
-        // Run rate controller
-        return run_custom_axis_rate_control(desired_rate_degs, scaler, disable_integrator, ground_mode);
-    }
-
-    // Apply input shaping to desired angle
-    const float dt = AP::scheduler().get_loop_period_s();
-
-    const float accel_max = accel_limit.get();
-    const float jerk_limit = accel_max / MAX(gains.tau.get(), 0.1);
-
-    // Ensure the shortest path is taken
-    const float angle_error = wrap_180(desired_angle_deg - angle_target_deg);
-
-    // Apply input shaping updating the accel target
-    shape_pos_vel_accel(
-        angle_error, 0.0, 0.0, // desired pos, vel and accel
-        0.0, rate_target_degs, accel_target_degss, // current shaped target
-        -get_negative_rate_limit_degs(), get_positive_rate_limit_degs(), // velocity limits
-        -accel_max, accel_max, // accel limits
-        jerk_limit, // jerk limit
-        dt, true
-    );
-
-    // Integrate pos and vel from updated accel target
-    angle_target_deg += rate_target_degs * dt + accel_target_degss * 0.5 * sq(dt);
-    rate_target_degs += accel_target_degss * dt;
-
-    // Make sure target remains in the range +-180
-    angle_target_deg = wrap_180(angle_target_deg);
-
-    // Calculate angle error
-    angle_err_deg = wrap_180(angle_target_deg - get_measured_angle_deg());
-
-    // Use 1 / tau if angle gain is not set
-    float angle_gain = 1.0 / gains.tau.get();
-    if (is_positive(angle_p.get())) {
-        angle_gain = angle_p.get();
-    }
-
-    // Apply gain using sqrt controller
-    float desired_rate_degs = sqrt_controller(angle_err_deg, angle_gain, accel_max * 0.5, dt);
-
-    // Add feed forward rate demand and offset then constrain to rate limit
-    desired_rate_degs = rate_limit_degs(desired_rate_degs + rate_target_degs + get_rate_target_offset_degs()); 
-
-*/
-    // ###################### H Infinity controller #################################
+    // ###################### H Infinity Angle Controller #################################
     // ##############################################################################
 
 // Ensure tau is valid (Retained for legacy ArduPilot checks, though unused by H-inf)
@@ -258,7 +188,7 @@ float AP_PitchController::run_custom_angle_control(
 
     // 2. Define Integral Parameters 
     // (You can replace these with AP_Param variables later to tune via Mission Planner)
-    const float Ki_outer = 0.001f;   // Integral gain
+    const float Ki_outer = 0.1f;   // Integral gain ##########   Successful Ki = 0.1f ###############
     const float I_max = 15.0f;     // Maximum authority of the integrator (anti-windup limit)
 
     // 3. Update Controller States
@@ -461,119 +391,19 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
             _custom_target_derivative = (_custom_target - target_last) / dt;
         }
     }
-/*
-    // ############## START OF PID CONTROL ####################
-    update_i(dt, limit_I, 1.0f);
-
-    // Get native PID gains from ArduPilot parameters
-    const float Kp = 0.3f;              //rate_pid.kP().get();
-    const float Kd = 0.0001f;                  //rate_pid.kD().get();
-    
-
-
-    float P_out = (_custom_error * Kp);
-    float D_out = (_custom_derivative * Kd);
-    float I_out = _custom_integrator;
-
-    // This modifier is used to reduce control effort under fast transients
-    P_out *= _pid_info.Dmod;
-    D_out *= _pid_info.Dmod;
-
-    // scale pd output if required
-    P_out *= 1.0f;
-    D_out *= 1.0f;
-
-    const float Kpdmax = rate_pid.pdmax();
-
-
-    _pid_info.PD_limit = false;
-    // Apply PD sum limit if enabled
-    if (is_positive(Kpdmax)) {
-        const float PD_sum_abs = fabsf(P_out + D_out);
-        if (PD_sum_abs > Kpdmax) {
-            const float pd_limit_scale = Kpdmax / PD_sum_abs;
-            P_out *= pd_limit_scale;
-            D_out *= pd_limit_scale;
-            _pid_info.PD_limit = true;
-        }
-    }
 
     const float Kff = rate_pid.ff().get();
     const float Kdff = rate_pid.kDff().get();
 
-    _pid_info.target = _custom_target;
-    _pid_info.actual = measurement;
-    _pid_info.error = _custom_error;
-
-    _pid_info.P = P_out;
-    _pid_info.D = D_out;
-    _pid_info.I = I_out;
-
-    _pid_info.limit = limit_I;
-
-    // Set I set flag for logging and clear
-    _pid_info.I_term_set = _custom_I_set;
-    _custom_I_set = false;
-
-    _pid_info.FF = _custom_target * Kff;
-    _pid_info.DFF = _custom_target_derivative * Kdff;
-
-
-    // ###################### Update_all ends ########################
-
     const float ff = degrees(ff_scale *  _pid_info.FF / (scaler * eas2tas));
     const float dff = degrees(ff_scale * _pid_info.DFF / (scaler * eas2tas));
-
-    ff_scale = 1.0;
+    
+    update_i(dt, limit_I, 1.0f);
 
     if (disable_integrator) {
     _custom_integrator = 0.0f;
     _custom_I_set = true;
     }
-
-    
-    auto &pinfo = _pid_info;
-
-    const float deg_scale = degrees(1.0f);
-    pinfo.FF = ff;
-    pinfo.P *= deg_scale;
-    pinfo.I *= deg_scale;
-    pinfo.D *= deg_scale;
-    pinfo.DFF = dff;
-
-    // fix the logged target and actual values to not have the scalers applied
-    pinfo.target = desired_rate_degs;
-    pinfo.actual = degrees(rate_rads);
-
-    // sum components
-    float out = pinfo.FF + pinfo.P + pinfo.I + pinfo.D + pinfo.DFF;
-    
-    if (ground_mode) {
-        // when on ground suppress D and half P term to prevent oscillations
-        out -= pinfo.D + 0.5*pinfo.P;
-    }
-
-    // remember the last output to trigger the I limit
-    _last_out = out;
-
-    if (autotune != nullptr && autotune->running && get_airspeed() > aparm.airspeed_min) {
-        // let autotune have a go at the values
-        autotune->update(pinfo, scaler, angle_err_deg);
-    }
-
-    // output is scaled to notional centidegrees of deflection
-    return constrain_float(out * 100, -4500, 4500);
-*/
-
-    // ############## END OF PID CONTROL ####################
-
-    const float Kff = rate_pid.ff().get();
-    const float Kdff = rate_pid.kDff().get();
-
-    const float ff = degrees(ff_scale *  _pid_info.FF / (scaler * eas2tas));
-    const float dff = degrees(ff_scale * _pid_info.DFF / (scaler * eas2tas));
-    
-    update_i(dt, limit_I, 1.0f);
 
     float I_out = _custom_integrator;
 
@@ -586,11 +416,6 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
 
     _pid_info.FF = _custom_target * Kff;
     _pid_info.DFF = _custom_target_derivative * Kdff;
-
-    if (disable_integrator) {
-    _custom_integrator = 0.0f;
-    _custom_I_set = true;
-    }
 
     auto &pinfo = _pid_info;
     const float deg_scale = degrees(1.0f);
@@ -676,7 +501,7 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
 
 void AP_PitchController::update_i(float dt, bool limit, float i_scale)
 {   
-    const float Ki =   0.8f;              //rate_pid.kI().get();
+    const float Ki =   10.0f;              //rate_pid.kI().get(); // Successful Ki = 0.8f
     const float Imax = rate_pid.imax();
 
     if (!is_zero(Ki) && is_positive(dt)) {
@@ -689,5 +514,3 @@ void AP_PitchController::update_i(float dt, bool limit, float i_scale)
         _custom_integrator = 0.0f;
     }
 }
-
-
