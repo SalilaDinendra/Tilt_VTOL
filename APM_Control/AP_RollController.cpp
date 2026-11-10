@@ -128,7 +128,7 @@ float AP_RollController::run_custom_angle_control(int32_t desired_angle_cd, floa
 
     // 2. Define Integral Parameters 
     // (You can replace these with AP_Param variables later to tune via Mission Planner)
-    const float Ki_outer = 0.01f;   // Integral gain ##########   Successful Ki = 0.01f ###############
+    const float Ki_outer = 0.0f;   // Integral gain ##########   Successful Ki = 0.01f ###############
     const float I_max = 15.0f;     // Maximum authority of the integrator (anti-windup limit)
 
     // 3. Update Controller States
@@ -407,12 +407,12 @@ float AP_RollController::run_custom_axis_rate_control(float desired_rate_degs, f
     // offline nominal plant synthesis, not runtime Ziegler-Nichols probing.
     
     // Output is scaled to notional centidegrees of deflection
-    return constrain_float(out * 100, -4500, 4500);
+    return constrain_float(out*100, -4500, 4500);
 }
 
 void AP_RollController::update_i(float dt, bool limit, float i_scale)
 {   
-    const float Ki =   10.0f;              //rate_pid.kI().get(); // Successful Ki = 10.0f
+    const float Ki =  12.0f;              //rate_pid.kI().get(); // Successful Ki = 12.0f
     const float Imax = rate_pid.imax();
 
     if (!is_zero(Ki) && is_positive(dt)) {

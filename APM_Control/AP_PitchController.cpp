@@ -188,7 +188,7 @@ float AP_PitchController::run_custom_angle_control(
 
     // 2. Define Integral Parameters 
     // (You can replace these with AP_Param variables later to tune via Mission Planner)
-    const float Ki_outer = 0.1f;   // Integral gain ##########   Successful Ki = 0.1f ###############
+    const float Ki_outer = 0.0f;   // Integral gain ##########   Successful Ki = 0.1f ###############
     const float I_max = 15.0f;     // Maximum authority of the integrator (anti-windup limit)
 
     // 3. Update Controller States
@@ -237,13 +237,6 @@ float AP_PitchController::run_custom_angle_control(
 
     // Run your inner loop H-infinity rate controller
     return run_custom_axis_rate_control(desired_rate_degs, scaler, disable_integrator, ground_mode);
-
-    
-    return run_custom_axis_rate_control(
-        desired_rate_degs,
-        scaler,
-        disable_integrator,
-        ground_mode);
 }
 
 // Function returns an equivalent elevator deflection in centi-degrees in the range from -4500 to 4500
@@ -501,7 +494,7 @@ float AP_PitchController::run_custom_axis_rate_control(float desired_rate_degs, 
 
 void AP_PitchController::update_i(float dt, bool limit, float i_scale)
 {   
-    const float Ki =   10.0f;              //rate_pid.kI().get(); // Successful Ki = 0.8f
+    const float Ki = 12.0f;              //rate_pid.kI().get(); // Successful Ki = 10.0f (Stallion), (Comet 12.0f)
     const float Imax = rate_pid.imax();
 
     if (!is_zero(Ki) && is_positive(dt)) {
