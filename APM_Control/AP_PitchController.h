@@ -1,8 +1,6 @@
 #pragma once
 
 #include "AP_FW_Controller.h"
-#include "q_controller_fcn.h"
-#include "theta_controller_fcn.h"
 
 class AP_PitchController : public AP_FW_Controller
 {
@@ -31,9 +29,6 @@ private:
     float run_custom_axis_rate_control(float desired_rate_degs, float scaler, bool disable_integrator, bool ground_mode);
 
     uint32_t last_run_ticks;
-
-    q_controller_fcn _q_hinf_controller;
-    theta_controller_fcn _theta_hinf_controller;
 
     void update_i(float dt, bool limit, float i_scale = 1.0f);
 

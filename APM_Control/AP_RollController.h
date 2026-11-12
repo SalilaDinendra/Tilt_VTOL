@@ -14,10 +14,6 @@ public:
 
     void convert_pid();
 
-    /*
-      set the in_recovery flag, which is used during a VTOL upset recovery
-      this flag only lasts one loop
-    */
     void set_in_recovery(void) {
         in_recovery = true;
     }
@@ -28,6 +24,7 @@ public:
         bool disable_integrator,
         bool ground_mode);
 
+ 
 private:
     float run_axis_rate_control(float desired_rate_degs, float scaler, bool disable_integrator, bool ground_mode) override;
     float run_custom_axis_rate_control(float desired_rate_degs, float scaler, bool disable_integrator, bool ground_mode);
