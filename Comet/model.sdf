@@ -1,0 +1,855 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  
+  <model name="comet">
+
+    <link name="base_link">
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>2.0</mass>
+        <inertia>
+          <ixx>0.15798</ixx>
+          <ixy>0</ixy>
+          <ixz>0.0069325</ixz>
+          <iyy>0.2497</iyy>
+          <iyz>0</iyz>
+          <izz>0.40538</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='base_link_collision'>
+        <pose degrees="true">0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://stallion_vtol/meshes/base_link.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="fuselage_visual">
+        <pose degrees="true">0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://stallion_vtol/meshes/base_link.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>1.0 1.0 1.0</diffuse>
+          <specular>1.0 1.0 1.0</specular>
+          <pbr>
+            <metal>
+                <metalness>0.1</metalness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+
+      <!-- Sensors. -->
+      <sensor name="imu_sensor" type="imu">
+        <pose degrees="true">0 0 0 180 0 0</pose>
+        <always_on>1</always_on>
+        <update_rate>1000.0</update_rate>
+      </sensor>
+      <sensor name="navsat_sensor" type="navsat">
+        <always_on>1</always_on>
+        <update_rate>1</update_rate>
+      </sensor>
+    </link>
+    
+    <joint name='left_aileron_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>left_aileron_link</child>
+      <pose relative_to='base_link'>-0.067 0.295 0.0017 -1.571 0 0.0166</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.17453</lower>
+          <upper>0.17453</upper>
+          <effort>5.0</effort>
+          <velocity>10.0</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.0001</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='left_aileron_link'>
+      <pose relative_to='left_aileron_joint' degrees='true'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0.019319410829812499 -0.0015985079490108401 0.118957401128077 0 0 0</pose>
+        <mass>0.016</mass>
+        <inertia>
+          <ixx>0.00044028529108299999</ixx>
+          <ixy>1.35503903996988e-06</ixy>
+          <ixz>5.0702719884528399e-06</ixz>
+          <iyy>0.00045603458419739398</iyy>
+          <iyz>-4.2973911951881198e-07</iyz>
+          <izz>1.7003421149911501e-05</izz>
+        </inertia>
+      </inertial>
+      
+      <visual name='L_Aileron_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://stallion_vtol/meshes/L_Aileron.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.5 0 0.5 1</diffuse>
+          <ambient>0.5 0 0.5 1</ambient>
+        </material>
+      </visual>
+    </link>
+    
+    
+    <joint name='right_aileron_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>right_aileron_link</child>
+      <pose relative_to='base_link'>-0.0667 -0.295 0.0017 1.571 0 -0.0166</pose>
+      <axis>
+        <xyz>0 0 -1</xyz>
+        <limit>
+          <lower>-0.17452999999999999</lower>
+          <upper>0.17452999999999999</upper>
+          <effort>5.0</effort>
+          <velocity>10.0</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.0001</damping>
+          <friction>0</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='right_aileron_link'>
+      <pose relative_to='right_aileron_joint' degrees='true'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-0.0187801219375088 -0.0017102252922158701 0.118960916571928 0 0 0</pose>
+        <mass>0.016</mass>
+        <inertia>
+          <ixx>0.00044034243406479098</ixx>
+          <ixy>-1.4819480765882799e-06</ixy>
+          <ixz>-3.3799692095839499e-06</ixz>
+          <iyy>0.00045601138992668798</iyy>
+          <iyz>-3.1787437036860999e-07</iyz>
+          <izz>1.6969472438767499e-05</izz>
+        </inertia>
+      </inertial>
+      <collision name='R_Aileron_collision'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://stallion_vtol/meshes/R_Aileron.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='R_Aileron_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://stallion_vtol/meshes/R_Aileron.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.5 0 0.5 1</diffuse>
+          <ambient>0.5 0 0.5 1</ambient>
+        </material>
+      </visual>
+    </link>
+    
+    <joint name='rudder_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>rudder_link</child>
+      <pose relative_to='base_link'>-0.546 0 0.0371 -1.571 -0.156 0</pose>
+      <axis>
+        <xyz>0 -1 0</xyz>
+        <limit>
+          <lower>-0.17453</lower>
+          <upper>0.17453</upper>
+          <effort>5.0</effort>
+          <velocity>10.0</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.0001</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='rudder_link'>
+      <pose relative_to='rudder_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-0.0112 -0.042 0 0 0 0</pose>
+        <mass>0.010</mass>
+        <inertia>
+          <ixx>8.6199016260957796e-05</ixx>
+          <ixy>-5.6589289969212396e-12</ixy>
+          <ixz>-4.8692063497864804e-07</ixz>
+          <iyy>8.7366984895579199e-05</iyy>
+          <iyz>3.3887043768425699e-10</iyz>
+          <izz>1.2400412416049001e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='Rudder_collision'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://stallion_vtol/meshes/rudder_link.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='Rudder_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://stallion_vtol/meshes/rudder_link.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.5 0 0.5 1</diffuse>
+          <ambient>0.5 0 0.5 1</ambient>
+        </material>
+      </visual>
+    </link> 
+    
+ 
+    <joint name='right_elevator_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>right_elevator_link</child>
+      <pose relative_to='base_link'>-0.545 -0.062 -0.0085 1.562 -0.0009 -0.11</pose>
+      <axis>
+        <xyz>0 0 -1</xyz>
+        <limit>
+          <lower>-0.17453</lower>
+          <upper>0.17453</upper>
+          <effort>5.0</effort>
+          <velocity>10.0</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.0001</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='right_elevator_link'>
+      <pose relative_to='right_elevator_joint' degrees='true'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-0.0109 0.0001 0.0615 0 0 0</pose>
+        <mass>0.010</mass>
+        <inertia>
+          <ixx>8.61939121689117e-05</ixx>
+          <ixy>8.4556113501244802e-11</ixy>
+          <ixz>-8.1896557437626005e-07</ixz>
+          <iyy>8.7366984889395994e-05</iyy>
+          <iyz>-2.6894751914679101e-10</iyz>
+          <izz>1.2451453394070899e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='R_Rudder_collision'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://stallion_vtol/meshes/right_elevator_link.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='R_Rudder_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://stallion_vtol/meshes/right_elevator_link.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.5 0 0.5 1</diffuse>
+          <ambient>0.5 0 0.5 1</ambient>
+        </material>
+      </visual>
+    </link>
+    
+    
+    <joint name='left_elevator_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>left_elevator_link</child>
+      <pose relative_to='base_link'>-0.545 0.062 -0.0085 1.562 -0.0009 0.11</pose>
+      <axis>
+        <xyz>0 0 -1</xyz>
+        <limit>
+          <lower>-0.17453</lower>
+          <upper>0.17453</upper>
+          <effort>5.0</effort>
+          <velocity>10.0</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.0001</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='left_elevator_link'>
+      <pose relative_to='left_elevator_joint' degrees='true'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-0.0109 0.0001 -0.0615 0 0 0</pose>
+        <mass>0.010</mass>
+        <inertia>
+          <ixx>8.61939121689117e-05</ixx>
+          <ixy>8.4556113501244802e-11</ixy>
+          <ixz>-8.1896557437626005e-07</ixz>
+          <iyy>8.7366984889395994e-05</iyy>
+          <iyz>-2.6894751914679101e-10</iyz>
+          <izz>1.2451453394070899e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='R_Rudder_collision'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://stallion_vtol/meshes/left_elevator_link.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='R_Rudder_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://stallion_vtol/meshes/left_elevator_link.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.5 0 0.5 1</diffuse>
+          <ambient>0.5 0 0.5 1</ambient>
+        </material>
+      </visual>
+    </link>
+    
+    
+
+    <link name="motor_link_left">
+      <pose degrees="true">0.125 0.30 0.0025 0 -90 0</pose>
+      <inertial>
+        
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>9.75e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.000166704</iyy>
+          <iyz>0</iyz>
+          <izz>0.000167604</izz>
+        </inertia>
+      </inertial>
+
+      <visual name="motor_visual">
+        <geometry>
+          <mesh>
+            <uri>model://mini_talon_vtail/meshes/propdrive_3536_motor_can.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="propeller_visual">
+        <pose degrees="true">0 0 -0.005 0 180 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://stallion_vtol/meshes/R_Prop.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.01 0.01 0.01 1</ambient>
+          <diffuse>0.01 0.01 0.01 1</diffuse>
+          <specular>0.01 0.01 0.01 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="motor_joint_left" type="revolute">
+      <pose degrees="true">0 0 0 0 180 0</pose>
+      <parent>base_link</parent>
+      <child>motor_link_left</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.0e-16</lower>
+          <upper>1.0e+16</upper>
+        </limit>
+        <dynamics>
+          <damping>0.004</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    
+    <!--####### Right Motor ########## -->
+    
+    <link name="motor_link_right">
+      <pose degrees="true">0.125 -0.30 0.0025 0 -90 0</pose>
+      <inertial>
+        
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>9.75e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.000166704</iyy>
+          <iyz>0</iyz>
+          <izz>0.000167604</izz>
+        </inertia>
+      </inertial>
+
+      <visual name="motor_visual">
+        <geometry>
+          <mesh>
+            <uri>model://mini_talon_vtail/meshes/propdrive_3536_motor_can.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="propeller_visual">
+        <pose degrees="true">0 0 -0.005 0 180 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://stallion_vtol/meshes/R_Prop.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.01 0.01 0.01 1</ambient>
+          <diffuse>0.01 0.01 0.01 1</diffuse>
+          <specular>0.01 0.01 0.01 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="motor_joint_right" type="revolute">
+      <pose degrees="true">0 0 0 0 180 0</pose>
+      <parent>base_link</parent>
+      <child>motor_link_right</child>
+      <axis>
+        <xyz>0 0 -1</xyz>
+        <limit>
+          <lower>-1.0e-16</lower>
+          <upper>1.0e+16</upper>
+        </limit>
+        <dynamics>
+          <damping>0.004</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    
+    
+    <!-- System plugins. -->
+    <plugin filename="gz-sim-joint-state-publisher-system"
+      name="gz::sim::systems::JointStatePublisher">
+    </plugin>
+
+    <!-- Positive is up. -->
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>left_aileron_joint</joint_name>
+      <initial_position>0.0</initial_position>
+      <topic>/left_aileron_joint/cmd_pos</topic>
+      <p_gain>10</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>0.0</d_gain>
+      <i_max>1</i_max>
+      <i_min>-1</i_min>
+      <cmd_max>5</cmd_max>
+      <cmd_min>-5</cmd_min>
+    </plugin>
+
+    <!-- Positive is up. -->
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>right_aileron_joint</joint_name>
+      <initial_position>0.0</initial_position>
+      <topic>/right_aileron_joint/cmd_pos</topic>
+      <p_gain>10</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>0.0</d_gain>
+      <i_max>1</i_max>
+      <i_min>-1</i_min>
+      <cmd_max>5</cmd_max>
+      <cmd_min>-5</cmd_min>
+    </plugin>
+
+    <!-- Positive is up. -->
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>rudder_joint</joint_name>
+      <initial_position>0.0</initial_position>
+      <topic>/rudder_joint/cmd_pos</topic>
+      <p_gain>10</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>0.0</d_gain>
+      <i_max>1</i_max>
+      <i_min>-1</i_min>
+      <cmd_max>5</cmd_max>
+      <cmd_min>-5</cmd_min>
+    </plugin>
+
+    <!-- Positive is up. -->
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>right_elevator_joint</joint_name>
+      <initial_position>0.0</initial_position>
+      <topic>/right_elevator_joint/cmd_pos</topic>
+      <p_gain>10</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>0.0</d_gain>
+      <i_max>1</i_max>
+      <i_min>-1</i_min>
+      <cmd_max>5</cmd_max>
+      <cmd_min>-5</cmd_min>
+    </plugin>
+    
+    <!-- Positive is up. -->
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>left_elevator_joint</joint_name>
+      <initial_position>0.0</initial_position>
+      <topic>/left_elevator_joint/cmd_pos</topic>
+      <p_gain>10</p_gain>
+      <i_gain>0.0</i_gain>
+      <d_gain>0.0</d_gain>
+      <i_max>1</i_max>
+      <i_min>-1</i_min>
+      <cmd_max>5</cmd_max>
+      <cmd_min>-5</cmd_min>
+    </plugin>
+    
+    
+    <!-- motor_joint_left cw -->
+    <plugin filename="gz-sim-lift-drag-system"
+        name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0>
+      <alpha_stall>1.4</alpha_stall>
+      <cla>4.25</cla>
+      <cda>0.10</cda>
+      <cma>0.00</cma>
+      <cla_stall>-0.025</cla_stall>
+      <cda_stall>0.0</cda_stall>
+      <cma_stall>0.0</cma_stall>
+      <area>0.02</area>
+      <air_density>1.2041</air_density>
+      <cp>0.084 0 0</cp>
+      <forward>0 -1 0</forward>
+      <upward>0 0 -1</upward>
+      <link_name>motor_link_left</link_name>
+    </plugin>
+    <plugin filename="gz-sim-lift-drag-system"
+        name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0>
+      <alpha_stall>1.4</alpha_stall>
+      <cla>4.25</cla>
+      <cda>0.10</cda>
+      <cma>0.00</cma>
+      <cla_stall>-0.025</cla_stall>
+      <cda_stall>0.0</cda_stall>
+      <cma_stall>0.0</cma_stall>
+      <area>0.02</area>
+      <air_density>1.2041</air_density>
+      <cp>-0.084 0 0</cp>
+      <forward>0 1 0</forward>
+      <upward>0 0 -1</upward>
+      <link_name>motor_link_left</link_name>
+    </plugin>
+    
+    <!-- motor_joint_right ccw -->
+    <plugin filename="gz-sim-lift-drag-system"
+        name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0>
+      <alpha_stall>1.4</alpha_stall>
+      <cla>4.25</cla>
+      <cda>0.10</cda>
+      <cma>0.00</cma>
+      <cla_stall>-0.025</cla_stall>
+      <cda_stall>0.0</cda_stall>
+      <cma_stall>0.0</cma_stall>
+      <area>0.02</area>
+      <air_density>1.2041</air_density>
+      <cp>0.084 0 0</cp>
+      <forward>0 1 0</forward>
+      <upward>0 0 -1</upward>
+      <link_name>motor_link_right</link_name>
+    </plugin>
+    <plugin filename="gz-sim-lift-drag-system"
+        name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0>
+      <alpha_stall>1.4</alpha_stall>
+      <cla>4.25</cla>
+      <cda>0.10</cda>
+      <cma>0.00</cma>
+      <cla_stall>-0.025</cla_stall>
+      <cda_stall>0.0</cda_stall>
+      <cma_stall>0.0</cma_stall>
+      <area>0.02</area>
+      <air_density>1.2041</air_density>
+      <cp>-0.084 0 0</cp>
+      <forward>0 -1 0</forward>
+      <upward>0 0 -1</upward>
+      <link_name>motor_link_right</link_name>
+    </plugin>
+
+    <!-- left wing -->
+    <plugin filename="gz-sim-lift-drag-system"
+        name="gz::sim::systems::LiftDrag">
+      <a0>0.13</a0> <!-- -2.312 deg -->
+      <cla>5.06</cla>
+      <cda>0.06417112299</cda>
+      <cma>-0.00095</cma>
+      <alpha_stall>0.279253</alpha_stall>
+      <cla_stall>-3.85</cla_stall>
+      <cda_stall>-0.9233984055</cda_stall>
+      <cma_stall>0</cma_stall>
+      <cp>0 0.27 0.029</cp>
+      <area>0.1658</area>
+      <air_density>1.2041</air_density>
+      <forward>1 0 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>base_link</link_name>
+      <control_joint_name>left_aileron_joint</control_joint_name>
+      <control_joint_rad_to_cl>-0.75</control_joint_rad_to_cl>
+    </plugin>
+
+    <!-- right wing -->
+    <plugin filename="gz-sim-lift-drag-system"
+        name="gz::sim::systems::LiftDrag">
+      <a0>0.13</a0> <!-- -2.312 deg -->
+      <cla>5.06</cla>
+      <cda>0.06417112299</cda>
+      <cma>-0.00095</cma>
+      <alpha_stall>0.279253</alpha_stall>
+      <cla_stall>-3.85</cla_stall>
+      <cda_stall>-0.9233984055</cda_stall>
+      <cma_stall>0</cma_stall>
+      <cp>0 -0.27 0.029</cp>
+      <area>0.1658</area>
+      <air_density>1.2041</air_density>
+      <forward>1 0 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>base_link</link_name>
+      <control_joint_name>right_aileron_joint</control_joint_name>
+      <control_joint_rad_to_cl>-0.75</control_joint_rad_to_cl>
+    </plugin>
+
+    <!-- left tail -->
+    <plugin filename="gz-sim-lift-drag-system"
+        name="gz::sim::systems::LiftDrag">
+      <a0>0.13</a0>
+      <cla>3.7</cla>
+      <cda>0.06417112299</cda>
+      <cma>0</cma>
+      <alpha_stall>0.3391428111</alpha_stall>
+      <cla_stall>-3.85</cla_stall>
+      <cda_stall>-0.9233984055</cda_stall>
+      <cma_stall>0</cma_stall>
+      <cp>-0.33 0.08 0.051</cp>
+      <area>0.035</area>
+      <air_density>1.2041</air_density>
+      <forward>1 0 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>base_link</link_name>
+      <control_joint_name>left_elevator_joint</control_joint_name>
+      <control_joint_rad_to_cl>-2.0</control_joint_rad_to_cl>
+    </plugin>
+
+    <!-- right tail -->
+    <plugin filename="gz-sim-lift-drag-system"
+        name="gz::sim::systems::LiftDrag">
+      <a0>0.13</a0>
+      <cla>3.7</cla>
+      <cda>0.06417112299</cda>
+      <cma>0</cma>
+      <alpha_stall>0.3391428111</alpha_stall>
+      <cla_stall>-3.85</cla_stall>
+      <cda_stall>-0.9233984055</cda_stall>
+      <cma_stall>0</cma_stall>
+      <cp>-0.33 -0.08 0.051</cp>
+      <area>0.035</area>
+      <air_density>1.2041</air_density>
+      <forward>1 0 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>base_link</link_name>
+      <control_joint_name>right_elevator_joint</control_joint_name>
+      <control_joint_rad_to_cl>-2.0</control_joint_rad_to_cl>
+    </plugin>
+    
+    <!-- rudder tail -->
+    <plugin filename="gz-sim-lift-drag-system"
+        name="gz::sim::systems::LiftDrag">
+      <a0>0.0</a0>
+      <cla>3.7</cla>
+      <cda>0.06417112299</cda>
+      <cma>0</cma>
+      <alpha_stall>0.3391428111</alpha_stall>
+      <cla_stall>-3.85</cla_stall>
+      <cda_stall>-0.9233984055</cda_stall>
+      <cma_stall>0</cma_stall>
+      <cp>-0.33 0 0.051</cp>
+      <area>0.035</area>
+      <air_density>1.2041</air_density>
+      <forward>1 0 0</forward>
+      <upward>0 -1 0</upward>
+      <link_name>base_link</link_name>
+      <control_joint_name>rudder_joint</control_joint_name>
+      <control_joint_rad_to_cl>-2.0</control_joint_rad_to_cl>
+    </plugin>
+    
+    
+    <plugin name="ArduPilotPlugin"
+      filename="ArduPilotPlugin">
+      <!-- Port settings. -->
+      <fdm_addr>127.0.0.1</fdm_addr>
+      <fdm_port_in>9002</fdm_port_in>
+      <connectionTimeoutMaxCount>5</connectionTimeoutMaxCount>
+      <lock_step>1</lock_step>
+      <have_32_channels>0</have_32_channels>
+
+      <!-- Frame transforms.-->
+      <modelXYZToAirplaneXForwardZDown>0 0 0 3.141593 0 0</modelXYZToAirplaneXForwardZDown>
+      <gazeboXYZToNED>0 0 0 3.141593 0 1.57079632</gazeboXYZToNED>
+
+      <!-- Sensors. -->
+      <imuName>base_link::imu_sensor</imuName>
+
+      <!--
+          Joint range -30/+30 deg
+
+          SERVO1_FUNCTION   4 (Aileron)
+          SERVO1_MAX        2000
+          SERVO1_MIN        1000
+          SERVO1_REVERSED   0
+          SERVO1_TRIM       1500
+       -->
+      <control channel="0">
+        <jointName>left_aileron_joint</jointName>
+        <multiplier>-1.0471976</multiplier>
+        <offset>-0.5</offset>
+        <servo_min>1000</servo_min>
+        <servo_max>2000</servo_max>
+        <type>COMMAND</type>
+        <cmd_topic>/left_aileron_joint/cmd_pos</cmd_topic>
+      </control>
+
+      <control channel="0">
+        <jointName>right_aileron_joint</jointName>
+        <multiplier>1.0471976</multiplier>
+        <offset>-0.5</offset>
+        <servo_min>1000</servo_min>
+        <servo_max>2000</servo_max>
+        <type>COMMAND</type>
+        <cmd_topic>/right_aileron_joint/cmd_pos</cmd_topic>
+      </control>
+
+      <!--
+          Joint range -30/+30 deg
+
+          SERVO2_FUNCTION   79 (Left V-Tail)
+          SERVO2_MAX        2000
+          SERVO2_MIN        1000
+          SERVO2_REVERSED   0
+          SERVO2_TRIM       1500
+       -->
+      <control channel="1">
+        <jointName>left_elevator_joint</jointName>
+        <multiplier>1.0471976</multiplier>
+        <offset>-0.5</offset>
+        <servo_min>1000</servo_min>
+        <servo_max>2000</servo_max>
+        <type>COMMAND</type>
+        <cmd_topic>/left_elevator_joint/cmd_pos</cmd_topic>
+      </control>
+      
+      <control channel="1">
+        <jointName>right_elevator_joint</jointName>
+        <multiplier>1.0471976</multiplier>
+        <offset>-0.5</offset>
+        <servo_min>1000</servo_min>
+        <servo_max>2000</servo_max>
+        <type>COMMAND</type>
+        <cmd_topic>/right_elevator_joint/cmd_pos</cmd_topic>
+        
+      </control>
+
+      <!--/fault/left_ruddervator_raw
+          SERVO3_FUNCTION   70 (Throttle)
+          SERVO3_MAX        2000
+          SERVO3_MIN        1000
+          SERVO3_REVERSED   0
+          SERVO3_TRIM       1000
+       -->
+      <control channel="2"> 
+        <jointName>motor_joint_left</jointName>
+        <multiplier>1000</multiplier>
+        <offset>0</offset>
+        <servo_min>1000</servo_min>
+        <servo_max>2000</servo_max>
+        <type>VELOCITY</type>
+        <p_gain>0.20</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>1</i_max>
+        <i_min>-1</i_min>
+        <cmd_max>5.0</cmd_max>
+        <cmd_min>-5.0</cmd_min>
+      </control>
+      
+      <control channel="2"> 
+        <jointName>motor_joint_right</jointName>
+        <multiplier>1000</multiplier>
+        <offset>0</offset>
+        <servo_min>1000</servo_min>
+        <servo_max>2000</servo_max>
+        <type>VELOCITY</type>
+        <p_gain>0.20</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>1</i_max>
+        <i_min>-1</i_min>
+        <cmd_max>5.0</cmd_max>
+        <cmd_min>-5.0</cmd_min>
+      </control>
+
+      <!--
+          Joint range -30/+30 deg
+
+          SERVO4_FUNCTION   80 (Right V-Tail)
+          SERVO4_MAX        2000
+          SERVO4_MIN        1000
+          SERVO4_REVERSED   0
+          SERVO4_TRIM       1500
+       -->
+      <control channel="3">
+        <jointName>rudder_joint</jointName>
+        <multiplier>1.0471976</multiplier>
+        <offset>-0.5</offset>
+        <servo_min>1000</servo_min>
+        <servo_max>2000</servo_max>
+        <type>COMMAND</type>
+        <cmd_topic>/rudder_joint/cmd_pos</cmd_topic>
+      </control>
+
+    </plugin>
+  </model>
+  
+</sdf>
+
+
