@@ -393,7 +393,7 @@ float AP_RollController::run_custom_axis_rate_control(float desired_rate_degs, f
 
 void AP_RollController::update_i(float dt, bool limit, float i_scale)
 {   
-    const float Ki =  12.0f;              //rate_pid.kI().get(); // Successful Ki = 12.0f
+    const float Ki =  20.0f;              //rate_pid.kI().get(); // Successful Ki = 12.0f
     const float Imax = rate_pid.imax();
 
     if (!is_zero(Ki) && is_positive(dt)) {
